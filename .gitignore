@@ -1,0 +1,51 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.iml
+
+# Logs
+*.log
+
+# Local agent state
+.claude/
+.sixth/
+
+# Secrets (Laravel)
+BnB-Backend/.env
+*.key
+
+# Laravel
+BnB-Backend/vendor/
+BnB-Backend/node_modules/
+BnB-Backend/storage/logs/
+BnB-Backend/storage/framework/cache/
+BnB-Backend/storage/framework/sessions/
+BnB-Backend/storage/framework/views/
+BnB-Backend/storage/framework/testing/
+BnB-Backend/storage/app/public/
+BnB-Backend/public/storage
+BnB-Backend/bootstrap/cache/*.php
+BnB-Backend/database/database.sqlite
+
+# Flutter
+BnB-Mobile/.dart_tool/
+BnB-Mobile/.flutter-plugins
+BnB-Mobile/.flutter-plugins-dependencies
+BnB-Mobile/build/
+BnB-Mobile/android/.gradle/
+BnB-Mobile/android/app/build/
+BnB-Mobile/android/build/
+BnB-Mobile/android/local.properties
+BnB-Mobile/ios/Flutter/Generated.xcconfig
+BnB-Mobile/ios/Flutter/flutter_export_environment.sh
+BnB-Mobile/ios/Pods/
+BnB-Mobile/macos/Pods/
+BnB-Mobile/.idea/
+
+# C++ / Qt / CMake (Desktop)
+BnB-Desktop/build/
+BnB-Desktop/cmake-build-*/
+BnB-Desktop/*.user
