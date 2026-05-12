@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 import '../models/worker_service.dart';
 import '../models/review.dart';
 import '../services/api_service.dart';
@@ -19,6 +20,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   bool _isLoading = true;
   final _noteController = TextEditingController();
   final _addressController = TextEditingController();
+
+  Future<void> _callPhone(String? phone) async {
+    if (phone == null || phone.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No phone number available')),
+        );
+      }
+      return;
+    }
+    final uri = Uri.parse('tel:$phone');
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (ok) return;
+    } catch (_) {}
+    await Clipboard.setData(ClipboardData(text: phone));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No dialer found. Number copied: $phone')),
+      );
+    }
+  }
 
   static const _typeIcons = {
     'plumbing': Icons.plumbing,
@@ -169,8 +192,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         subtitle: Text(_service!.worker!.phone ?? ''),
                         trailing: IconButton(
                           icon: const Icon(Icons.phone, color: Colors.green),
-                          onPressed: () => launchUrl(
-                              Uri.parse('tel:${_service!.worker!.phone}')),
+                          onPressed: () => _callPhone(_service!.worker!.phone),
                         ),
                       ),
                     ],

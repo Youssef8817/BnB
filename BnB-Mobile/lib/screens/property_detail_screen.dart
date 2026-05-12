@@ -8,6 +8,7 @@ import 'package:b_and_b/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
@@ -142,23 +143,31 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
   Future<void> _callOwner() async {
     final phone = _owner?.phone ?? '';
-    if (phone.isNotEmpty) {
-      final Uri uri = Uri.parse('tel:$phone');
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not launch phone dialer')),
-          );
-        }
-      }
-    } else {
+    if (phone.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No phone number available')),
         );
       }
+      return;
+    }
+
+    final Uri uri = Uri.parse('tel:$phone');
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) return;
+    } catch (_) {
+      // fall through to clipboard fallback
+    }
+
+    await Clipboard.setData(ClipboardData(text: phone));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No dialer found. Number copied: $phone')),
+      );
     }
   }
 
