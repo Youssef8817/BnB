@@ -43,16 +43,16 @@ class Property {
     }
 
     return Property(
-      id: json['id'],
-      ownerId: json['owner_id'] ?? json['ownerId'] ?? 0,
-      title: json['title'],
-      description: json['description'],
+      id: _toInt(json['id']),
+      ownerId: _toInt(json['owner_id'] ?? json['ownerId']),
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
       price: _toDouble(json['price']),
-      location: json['location'],
-      city: json['city'],
+      location: json['location'] ?? '',
+      city: json['city'] ?? '',
       areaMq: _toDouble(json['area_m2'] ?? json['areaMq']),
-      rooms: json['rooms'],
-      status: json['status'],
+      rooms: _toInt(json['rooms']),
+      status: json['status'] ?? 'available',
       images: images,
     );
   }
@@ -66,4 +66,11 @@ double _toDouble(dynamic v) {
   if (v == null) return 0;
   if (v is num) return v.toDouble();
   return double.tryParse(v.toString().replaceAll(',', '')) ?? 0;
+}
+
+int _toInt(dynamic v) {
+  if (v == null) return 0;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString().replaceAll(',', '')) ?? 0;
 }

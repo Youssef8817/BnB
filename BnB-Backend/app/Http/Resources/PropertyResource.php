@@ -16,21 +16,21 @@ class PropertyResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'owner_id' => $this->owner_id,
+            'id' => (int) $this->id,
+            'owner_id' => (int) $this->owner_id,
             'title' => $this->title,
             'description' => $this->description,
-            'price' => number_format($this->price, 2),
+            'price' => number_format((float) $this->price, 2),
             'location' => $this->location,
             'city' => $this->city,
-            'area_m2' => $this->area_m2,
-            'rooms' => $this->rooms,
+            'area_m2' => (int) $this->area_m2,
+            'rooms' => (int) $this->rooms,
             'status' => $this->status,
             'image_urls' => $this->images->map(function ($image) {
                 return Storage::url($image->path);
             }),
             'owner' => [
-                'id' => $this->owner->id,
+                'id' => (int) $this->owner->id,
                 'name' => $this->owner->name,
                 'phone' => $this->owner->phone,
             ],
