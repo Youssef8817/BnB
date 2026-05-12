@@ -263,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             IconButton(
                               icon: const Icon(Icons.edit, size: 18),
                               onPressed: () {
-                                _phoneController.text = _user!.phone;
+                                _phoneController.text = _user!.phone ?? '';
                                 setState(() => _editingPhone = true);
                               },
                             ),
@@ -273,7 +273,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         children: [
                           const Text('Role: ', style: TextStyle(fontSize: 16)),
-                          RoleBadge(role: _user!.role),
+                          RoleBadge(role: _user!.role ?? ''),
                         ],
                       ),
                       if (_user!.role == 'worker') ...[

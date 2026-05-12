@@ -109,8 +109,10 @@ class ApiService {
       uriWithQuery,
       headers: await _headers(),
     );
-    final Map<String, dynamic> data = (await _handleResponse(response)) as Map<String, dynamic>;
-    final List<dynamic> propertiesJson = (data['data'] as Map<String, dynamic>)['data'] as List<dynamic>;
+    final dynamic raw = await _handleResponse(response);
+    final List<dynamic> propertiesJson = raw is List
+        ? raw
+        : (raw as Map<String, dynamic>)['data'] as List<dynamic>;
     return propertiesJson.map((json) => Property.fromJson(json)).toList();
   }
 
@@ -218,8 +220,10 @@ class ApiService {
       Uri.parse('${Constants.baseUrl}/my-properties'),
       headers: await _headers(),
     );
-    final Map<String, dynamic> data = (await _handleResponse(response)) as Map<String, dynamic>;
-    final List<dynamic> propertiesJson = (data['data'] as Map<String, dynamic>)['data'] as List<dynamic>;
+    final dynamic raw = await _handleResponse(response);
+    final List<dynamic> propertiesJson = raw is List
+        ? raw
+        : (raw as Map<String, dynamic>)['data'] as List<dynamic>;
     return propertiesJson.map((json) => Property.fromJson(json)).toList();
   }
 

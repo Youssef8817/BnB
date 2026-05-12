@@ -30,23 +30,27 @@ class Property {
   });
 
   factory Property.fromJson(Map<String, dynamic> json) {
-    // Parse images list
     List<PropertyImage> images = [];
-    if (json['images'] != null) {
+    if (json['images'] is List) {
       images = (json['images'] as List)
-          .map((i) => PropertyImage.fromJson(i))
+          .map((i) => PropertyImage.fromJson(i as Map<String, dynamic>))
           .toList();
+    } else if (json['image_urls'] is List) {
+      final urls = (json['image_urls'] as List).cast<String>();
+      for (var i = 0; i < urls.length; i++) {
+        images.add(PropertyImage.fromUrl(urls[i], i));
+      }
     }
 
     return Property(
       id: json['id'],
-      ownerId: json['ownerId'],
+      ownerId: json['owner_id'] ?? json['ownerId'] ?? 0,
       title: json['title'],
       description: json['description'],
-      price: json['price'].toDouble(),
+      price: _toDouble(json['price']),
       location: json['location'],
       city: json['city'],
-      areaMq: json['areaMq'].toDouble(),
+      areaMq: _toDouble(json['area_m2'] ?? json['areaMq']),
       rooms: json['rooms'],
       status: json['status'],
       images: images,
@@ -56,4 +60,10 @@ class Property {
   String get formattedPrice {
     return '\$${price.toStringAsFixed(0)}';
   }
+}
+
+double _toDouble(dynamic v) {
+  if (v == null) return 0;
+  if (v is num) return v.toDouble();
+  return double.tryParse(v.toString().replaceAll(',', '')) ?? 0;
 }

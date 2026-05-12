@@ -166,7 +166,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         contentPadding: EdgeInsets.zero,
                         leading: const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(_service!.worker!.name),
-                        subtitle: Text(_service!.worker!.phone),
+                        subtitle: Text(_service!.worker!.phone ?? ''),
                         trailing: IconButton(
                           icon: const Icon(Icons.phone, color: Colors.green),
                           onPressed: () => launchUrl(

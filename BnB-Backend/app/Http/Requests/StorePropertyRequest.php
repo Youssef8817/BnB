@@ -30,7 +30,7 @@ class StorePropertyRequest extends FormRequest
             'area_m2' => 'required|numeric|min:1',
             'rooms' => 'required|integer|min:1|max:20',
             'images' => 'required|array|min:1|max:3',
-            'images.*' => 'required|file|mimes:jpg,jpeg,png|max:10240',
+            'images.*' => 'required|file|mimes:jpg,jpeg,png|max:25600',
         ];
     }
 }

@@ -22,7 +22,7 @@ class UpdatePropertyRequest extends FormRequest
             'area_m2'     => 'sometimes|numeric|min:1',
             'rooms'       => 'sometimes|integer|min:1|max:20',
             'images'      => 'sometimes|array|min:1|max:3',
-            'images.*'    => 'required_with:images|file|mimes:jpg,jpeg,png|max:10240',
+            'images.*'    => 'required_with:images|file|mimes:jpg,jpeg,png|max:25600',
         ];
     }
 }

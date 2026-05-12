@@ -28,10 +28,16 @@ class WorkerService {
       workerId: json['worker_id'] ?? json['workerId'] ?? 0,
       type: json['type'],
       description: json['description'],
-      pricePerUnit: json['price_per_unit'].toDouble(),
+      pricePerUnit: _toDouble(json['price_per_unit']),
       unit: json['unit'],
       isAvailable: json['is_available'],
       worker: json['worker'] != null ? User.fromJson(json['worker']) : null,
     );
   }
+}
+
+double _toDouble(dynamic v) {
+  if (v == null) return 0;
+  if (v is num) return v.toDouble();
+  return double.tryParse(v.toString().replaceAll(',', '')) ?? 0;
 }

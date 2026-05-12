@@ -4,28 +4,28 @@ import 'dart:convert';
 class User {
   final int id;
   final String name;
-  final String email;
-  final String phone;
-  final String role;
+  final String? email;
+  final String? phone;
+  final String? role;
   final String? avatarUrl;
 
   User({
     required this.id,
     required this.name,
-    required this.email,
-    required this.phone,
-    required this.role,
+    this.email,
+    this.phone,
+    this.role,
     this.avatarUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
       email: json['email'],
       phone: json['phone'],
       role: json['role'],
-      avatarUrl: json['avatarUrl'],
+      avatarUrl: json['avatar_url'] ?? json['avatarUrl'],
     );
   }
 
@@ -36,7 +36,7 @@ class User {
       'email': email,
       'phone': phone,
       'role': role,
-      'avatarUrl': avatarUrl,
+      'avatar_url': avatarUrl,
     };
   }
 }

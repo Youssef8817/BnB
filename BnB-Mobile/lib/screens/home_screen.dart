@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         serviceRepository.getAll(),
       ]);
       setState(() {
-        _userRole = (results[0] as dynamic).role as String;
+        _userRole = ((results[0] as dynamic).role as String?) ?? '';
         _properties = results[1] as List<Property>;
         _services = results[2] as List<WorkerService>;
         _isLoading = false;
