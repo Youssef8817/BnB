@@ -8,6 +8,7 @@ import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/models/worker_service.dart';
 import 'package:b_and_b/widgets/property_card.dart';
 import 'package:b_and_b/widgets/service_card.dart';
+import 'package:b_and_b/utils/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -141,8 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildUserView() {
     final featured = _properties.take(5).toList();
+    final r = Responsive(context);
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(r.isTablet ? 24 : 16),
       children: [
         _SectionHeader(
           title: 'Featured Properties',
@@ -156,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         else
           SizedBox(
-            height: 220,
+            height: r.featuredCardHeight(),
             child: PageView.builder(
               controller: _pageController,
               itemCount: featured.length,
@@ -179,12 +181,12 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         else
           SizedBox(
-            height: 130,
+            height: r.serviceTileHeight(),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _services.length,
               itemBuilder: (_, i) => SizedBox(
-                width: 160,
+                width: r.serviceTileWidth(),
                 child: ServiceCard(service: _services[i]),
               ),
             ),

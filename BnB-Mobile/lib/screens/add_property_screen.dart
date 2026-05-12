@@ -208,9 +208,16 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                     prefixIcon: Icon(Icons.hotel),
                   ),
                   keyboardType: TextInputType.number,
-                  validator: (v) => (v == null || v.isEmpty)
-                      ? 'Please enter the number of rooms'
-                      : null,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Please enter the number of rooms';
+                    }
+                    final n = int.tryParse(v.trim());
+                    if (n == null || n < 1 || n > 100) {
+                      return 'Rooms must be between 1 and 100';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(

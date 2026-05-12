@@ -131,54 +131,66 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(_iconForType(service.type), size: 24, color: Colors.blue),
-                const SizedBox(width: 12),
+                Icon(_iconForType(service.type), size: 22, color: Colors.blue),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     service.type,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Worker: ${service.worker?.name ?? 'Unknown'}',
-              style: const TextStyle(fontSize: 14),
-            ),
             const SizedBox(height: 4),
             Text(
-              'Price: \$${service.pricePerUnit.toStringAsFixed(2)}/${service.unit}',
-              style: const TextStyle(fontSize: 14, color: Colors.green),
+              service.worker?.name ?? 'Unknown',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
-              'Availability: ${service.isAvailable ? 'Available' : 'Not Available'}',
+              '\$${service.pricePerUnit.toStringAsFixed(0)}/${service.unit}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, color: Colors.green),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              service.isAvailable ? 'Available' : 'Not Available',
+              maxLines: 1,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 11,
                 color: service.isAvailable ? Colors.green : Colors.red,
               ),
             ),
-            if (service.isAvailable) ...[
-              const SizedBox(height: 8),
+            if (service.isAvailable)
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 28),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   onPressed: () => _showRequestSheet(context),
-                  child: const Text('Request'),
+                  child: const Text('Request', style: TextStyle(fontSize: 12)),
                 ),
               ),
-            ],
           ],
         ),
       ),

@@ -20,82 +20,95 @@ class PropertyCard extends StatelessWidget {
         );
       },
       child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            SizedBox(
-              height: 160,
+        clipBehavior: Clip.antiAlias,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final hasBoundedHeight = constraints.hasBoundedHeight;
+            final imageHeight = hasBoundedHeight
+                ? (constraints.maxHeight * 0.62).clamp(120.0, 220.0)
+                : 160.0;
+
+            final image = SizedBox(
+              height: imageHeight,
               width: double.infinity,
               child: property.images.isNotEmpty
                   ? CachedNetworkImage(
                       imageUrl: property.images.first.fullUrl,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[200],
-                      ),
+                      placeholder: (c, _) => Container(color: Colors.grey[200]),
+                      errorWidget: (c, _, __) =>
+                          Container(color: Colors.grey[200]),
                     )
-                  : Container(
-                      color: Colors.grey[200],
-                    ),
-            ),
-            // Padding and text
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+                  : Container(color: Colors.grey[200]),
+            );
+
+            final details = Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     property.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     property.formattedPrice,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.green,
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13, color: Colors.green),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          property.city,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${property.rooms} rooms',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${property.areaMq.toStringAsFixed(0)}m²',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
+                  _MetaRow(property: property),
                 ],
               ),
-            ),
-          ],
+            );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: hasBoundedHeight
+                  ? [image, Expanded(child: details)]
+                  : [image, details],
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  final Property property;
+  const _MetaRow({required this.property});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(property.city,
+              style: const TextStyle(fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
+        ),
+        Text('${property.rooms} rooms',
+            style: const TextStyle(fontSize: 11)),
+        Text('${property.areaMq.toStringAsFixed(0)}m²',
+            style: const TextStyle(fontSize: 11)),
+      ],
     );
   }
 }
