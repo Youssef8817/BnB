@@ -24,13 +24,13 @@ class WorkerService {
 
   factory WorkerService.fromJson(Map<String, dynamic> json) {
     return WorkerService(
-      id: json['id'],
-      workerId: json['worker_id'] ?? json['workerId'] ?? 0,
-      type: json['type'],
-      description: json['description'],
+      id: _toInt(json['id']),
+      workerId: _toInt(json['worker_id'] ?? json['workerId']),
+      type: json['type'] ?? '',
+      description: json['description'] ?? '',
       pricePerUnit: _toDouble(json['price_per_unit']),
-      unit: json['unit'],
-      isAvailable: json['is_available'],
+      unit: json['unit'] ?? '',
+      isAvailable: json['is_available'] ?? true,
       worker: json['worker'] != null ? User.fromJson(json['worker']) : null,
     );
   }
@@ -40,4 +40,11 @@ double _toDouble(dynamic v) {
   if (v == null) return 0;
   if (v is num) return v.toDouble();
   return double.tryParse(v.toString().replaceAll(',', '')) ?? 0;
+}
+
+int _toInt(dynamic v) {
+  if (v == null) return 0;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString().replaceAll(',', '')) ?? 0;
 }

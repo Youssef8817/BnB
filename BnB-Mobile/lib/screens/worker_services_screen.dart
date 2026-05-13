@@ -69,23 +69,24 @@ class _WorkerServicesScreenState extends State<WorkerServicesScreen> {
             },
           ),
           const SizedBox(height: 8),
-          // Services list
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _services.isEmpty
-                  ? const EmptyState(
-                      message: 'No services found',
-                      icon: Icons.widgets,
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadServices,
-                      child: ListView.builder(
-                        itemCount: _services.length,
-                        itemBuilder: (context, index) {
-                          return ServiceCard(service: _services[index]);
-                        },
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _services.isEmpty
+                    ? const EmptyState(
+                        message: 'No services found',
+                        icon: Icons.widgets,
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadServices,
+                        child: ListView.builder(
+                          itemCount: _services.length,
+                          itemBuilder: (context, index) {
+                            return ServiceCard(service: _services[index]);
+                          },
+                        ),
                       ),
-                    ),
+          ),
         ],
       ),
     );
