@@ -55,8 +55,11 @@ timeout /t 3 /nobreak > nul
 
 :: Step 2: Launch the Qt6 desktop app
 :: The app connects to the backend at http://127.0.0.1:8000
+:: Prepend MSYS2 mingw64 bin so bb-admin.exe finds its runtime DLLs
+:: (libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, Qt6*.dll)
 echo [2/2] Launching Desktop App...
-start "" "D:\BnB\BnB-Desktop\build\bb-admin.exe"
+set "PATH=C:\msys64\mingw64\bin;%PATH%"
+start "" /D "D:\BnB\BnB-Desktop\build" "D:\BnB\BnB-Desktop\build\bb-admin.exe"
 
 echo.
 echo Both started! Close this window anytime.
