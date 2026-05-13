@@ -1,8 +1,9 @@
 import 'dart:convert';
+
+import 'package:b_and_b/constants.dart';
+import 'package:b_and_b/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:b_and_b/services/api_service.dart';
-import 'package:b_and_b/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -44,8 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // Save token and user to SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(Constants.tokenKey, response['token']);
-        await prefs.setString(
-            Constants.userKey, json.encode(response['user']));
+        await prefs.setString(Constants.userKey, json.encode(response['user']));
         if (mounted) context.go('/home');
       } catch (e) {
         if (mounted) {
@@ -151,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Role',
                     prefixIcon: Icon(Icons.person_outline),
@@ -184,12 +184,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : const Text('Register'),
                   ),
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Back to Login'),
                 ),
               ],
             ),
