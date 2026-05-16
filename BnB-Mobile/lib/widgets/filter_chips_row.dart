@@ -1,3 +1,4 @@
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class FilterChipsRow extends StatelessWidget {
@@ -25,29 +26,22 @@ class FilterChipsRow extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(right: 8),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                gradient: isActive
-                    ? const LinearGradient(
-                        colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                      )
-                    : null,
-                color: isActive
-                    ? null
-                    : Colors.white.withValues(alpha: 0.05),
+                gradient: isActive ? AppColors.gradientPrimary : null,
+                color: isActive ? null : Colors.white.withValues(alpha: 0.05),
                 border: Border.all(
                   color: isActive
                       ? Colors.transparent
                       : Colors.white.withValues(alpha: 0.10),
                 ),
                 boxShadow: isActive
-                    ? const [
+                    ? [
                         BoxShadow(
-                          color: Color(0x33A078FF),
+                          color: AppColors.accentDeep.withValues(alpha: 0.35),
                           blurRadius: 12,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ]
                     : null,
@@ -56,11 +50,8 @@ class FilterChipsRow extends StatelessWidget {
                 option,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight:
-                      isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive
-                      ? const Color(0xFF3C0091)
-                      : const Color(0xFFCBC3D7),
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? Colors.white : AppColors.textMuted,
                   letterSpacing: 0.2,
                 ),
               ),

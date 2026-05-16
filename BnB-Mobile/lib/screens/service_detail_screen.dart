@@ -1,3 +1,4 @@
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -21,11 +22,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   final _noteController    = TextEditingController();
   final _addressController = TextEditingController();
-
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   static const _typeIcons = {
     'plumbing':   Icons.plumbing,
@@ -90,8 +86,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(msg), backgroundColor: const Color(0xFF93000A)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.errorBg),
       );
 
   void _showRequestSheet() {
@@ -117,7 +112,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Request sent successfully!'),
-                  backgroundColor: Color(0xFF1A1040),
+                  backgroundColor: AppColors.surface,
                 ),
               );
             }
@@ -132,41 +127,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Purple glow — top-right ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          // ── Blue glow — bottom-left ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Content ───────────────────────────────────────────────
           SafeArea(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: _primary))
+                    child: CircularProgressIndicator(
+                        color: AppColors.accent))
                 : _service == null
                     ? _buildNotFound()
                     : _buildContent(),
@@ -182,10 +154,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.search_off_rounded,
-              size: 56, color: _onSurfaceVariant.withValues(alpha: 0.4)),
+              size: 56,
+              color: AppColors.textMuted.withValues(alpha: 0.4)),
           const SizedBox(height: 12),
-          const Text('Service not found',
-              style: TextStyle(fontSize: 16, color: _onSurfaceVariant)),
+          Text('Service not found', style: AppText.bodySmall),
         ],
       ),
     );
@@ -194,6 +166,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildContent() {
     final s    = _service!;
     final icon = _typeIcons[s.type.toLowerCase()] ?? Icons.build_rounded;
+    final availColor =
+        s.isAvailable ? AppColors.success : AppColors.textMuted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,49 +177,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
           child: Row(
             children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.06),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.12)),
-                  ),
-                  child: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: _primary, size: 16),
-                ),
-              ),
+              BackButton2(onTap: () => Navigator.of(context).pop()),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  s.type.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _onSurface,
-                    letterSpacing: -0.3,
-                  ),
-                ),
+                child: Text(s.type.toUpperCase(), style: AppText.h3),
               ),
-              // Availability dot
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: (s.isAvailable
-                          ? const Color(0xFF4CAF50)
-                          : const Color(0xFF958EA0))
-                      .withValues(alpha: 0.15),
+                  color: availColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: (s.isAvailable
-                            ? const Color(0xFF4CAF50)
-                            : const Color(0xFF958EA0))
-                        .withValues(alpha: 0.4),
-                  ),
+                      color: availColor.withValues(alpha: 0.40)),
                 ),
                 child: Text(
                   s.isAvailable ? 'AVAILABLE' : 'UNAVAILABLE',
@@ -253,9 +197,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
-                    color: s.isAvailable
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFF958EA0),
+                    color: availColor,
                   ),
                 ),
               ),
@@ -269,39 +211,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
             children: [
-              // ── Hero card ─────────────────────────────────────────
-              Container(
+              // Hero card
+              GlassBox(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.20),
-                      blurRadius: 32,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        // Service icon circle
                         Container(
                           width: 60,
                           height: 60,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Color(0xFFA078FF),
-                                Color(0xFF6D3BD7)
+                                AppColors.accent,
+                                AppColors.accentDeep,
                               ],
                             ),
                           ),
@@ -313,24 +241,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                s.type.toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: _onSurface,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
+                              Text(s.type.toUpperCase(),
+                                  style: AppText.h4.copyWith(
+                                      letterSpacing: 0.5)),
                               const SizedBox(height: 4),
                               Text(
                                 '\$${s.pricePerUnit.toStringAsFixed(0)} / ${s.unit}',
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: _primary,
-                                  letterSpacing: -0.5,
-                                ),
+                                style: AppText.price,
                               ),
                             ],
                           ),
@@ -339,51 +256,31 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     ),
                     if (s.description.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Container(
-                        height: 1,
-                        color: Colors.white.withValues(alpha: 0.06),
-                      ),
+                      Divider(
+                          height: 1,
+                          color: Colors.white.withValues(alpha: 0.06)),
                       const SizedBox(height: 16),
-                      Text(
-                        s.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.6,
-                          color:
-                              _onSurfaceVariant.withValues(alpha: 0.85),
-                        ),
-                      ),
+                      Text(s.description, style: AppText.body),
                     ],
                   ],
                 ),
               ),
 
-              // ── Worker card ───────────────────────────────────────
+              // Worker card
               if (s.worker != null) ...[
                 const SizedBox(height: 16),
-                const _SectionLabel('Worker'),
+                Text('Worker', style: AppText.h4),
                 const SizedBox(height: 10),
-                Container(
+                GlassBox(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08)),
-                  ),
                   child: Row(
                     children: [
                       Container(
                         width: 44,
                         height: 44,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFA078FF),
-                              Color(0xFF00A2E6)
-                            ],
-                          ),
+                          gradient: AppColors.gradientPrimary,
                         ),
                         child: Center(
                           child: Text(
@@ -393,7 +290,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF3C0091),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -403,24 +300,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              s.worker!.name,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: _onSurface,
-                              ),
-                            ),
+                            Text(s.worker!.name,
+                                style: AppText.h4.copyWith(fontSize: 15)),
                             if (s.worker!.phone != null &&
                                 s.worker!.phone!.isNotEmpty)
-                              Text(
-                                s.worker!.phone!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: _onSurfaceVariant
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ),
+                              Text(s.worker!.phone!,
+                                  style: AppText.bodySmall),
                           ],
                         ),
                       ),
@@ -429,17 +314,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFFA078FF),
-                                Color(0xFF00A2E6)
-                              ],
-                            ),
+                            gradient: AppColors.gradientPrimary,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accentDeep
+                                    .withValues(alpha: 0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: const Icon(Icons.phone_rounded,
-                              color: Color(0xFF3C0091), size: 18),
+                              color: Colors.white, size: 18),
                         ),
                       ),
                     ],
@@ -447,18 +335,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
               ],
 
-              // ── Ratings summary ───────────────────────────────────
+              // Reviews summary
               const SizedBox(height: 16),
-              const _SectionLabel('Reviews'),
+              Text('Reviews', style: AppText.h4),
               const SizedBox(height: 10),
-              Container(
+              GlassBox(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08)),
-                ),
                 child: Row(
                   children: [
                     Column(
@@ -469,7 +351,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           style: const TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFFFFD700),
+                            color: AppColors.warning,
                             height: 1.0,
                           ),
                         ),
@@ -478,7 +360,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           rating: _avgRating,
                           itemBuilder: (_, __) => const Icon(
                               Icons.star_rounded,
-                              color: Color(0xFFFFD700)),
+                              color: AppColors.warning),
                           itemCount: 5,
                           itemSize: 18,
                           unratedColor:
@@ -487,11 +369,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         const SizedBox(height: 4),
                         Text(
                           '${_reviews.length} review${_reviews.length == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _onSurfaceVariant
-                                .withValues(alpha: 0.6),
-                          ),
+                          style: AppText.bodySmall,
                         ),
                       ],
                     ),
@@ -499,17 +377,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
               ),
 
-              // ── Review list ───────────────────────────────────────
               const SizedBox(height: 12),
               if (_reviews.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     'No reviews yet — be the first!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: _onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
+                    style: AppText.bodySmall,
                   ),
                 )
               else
@@ -517,74 +391,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
               const SizedBox(height: 24),
 
-              // ── Request button ────────────────────────────────────
-              GestureDetector(
+              GradientButton(
+                label: 'Request Service',
+                icon: Icons.build_rounded,
                 onTap: s.isAvailable ? _showRequestSheet : null,
-                child: AnimatedOpacity(
-                  opacity: s.isAvailable ? 1.0 : 0.45,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    height: 54,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                      ),
-                      boxShadow: s.isAvailable
-                          ? const [
-                              BoxShadow(
-                                color: Color(0x44A078FF),
-                                blurRadius: 20,
-                                offset: Offset(0, 6),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.build_rounded,
-                            color: Color(0xFF3C0091), size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Request Service',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C0091),
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                isLoading: false,
+                height: 54,
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Section label ─────────────────────────────────────────────────────────────
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFFDAE2FD),
-        letterSpacing: -0.2,
-      ),
     );
   }
 }
@@ -618,11 +435,9 @@ class _ReviewTile extends StatelessWidget {
               Container(
                 width: 32,
                 height: 32,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                  ),
+                  gradient: AppColors.gradientPrimary,
                 ),
                 child: Center(
                   child: Text(
@@ -632,7 +447,7 @@ class _ReviewTile extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF3C0091),
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -646,28 +461,17 @@ class _ReviewTile extends StatelessWidget {
                       review.userName.isNotEmpty
                           ? review.userName
                           : 'Anonymous',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFDAE2FD),
-                      ),
+                      style: AppText.body.copyWith(
+                          fontSize: 13, fontWeight: FontWeight.w600),
                     ),
-                    Text(
-                      date,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: const Color(0xFFCBC3D7)
-                            .withValues(alpha: 0.5),
-                      ),
-                    ),
+                    Text(date, style: AppText.bodySmall.copyWith(fontSize: 11)),
                   ],
                 ),
               ),
               RatingBarIndicator(
                 rating: review.rating.toDouble(),
                 itemBuilder: (_, __) => const Icon(
-                    Icons.star_rounded,
-                    color: Color(0xFFFFD700)),
+                    Icons.star_rounded, color: AppColors.warning),
                 itemCount: 5,
                 itemSize: 14,
                 unratedColor: Colors.white.withValues(alpha: 0.15),
@@ -676,14 +480,7 @@ class _ReviewTile extends StatelessWidget {
           ),
           if (review.comment.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Text(
-              review.comment,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFFCBC3D7).withValues(alpha: 0.8),
-              ),
-            ),
+            Text(review.comment, style: AppText.bodySmall),
           ],
         ],
       ),
@@ -714,9 +511,11 @@ class _RequestSheetState extends State<_RequestSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF111827),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -728,7 +527,6 @@ class _RequestSheetState extends State<_RequestSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle bar
           Center(
             child: Container(
               width: 40,
@@ -741,46 +539,34 @@ class _RequestSheetState extends State<_RequestSheet> {
           ),
           const SizedBox(height: 20),
 
-          const Text(
-            'Request Service',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFDAE2FD),
-              letterSpacing: -0.3,
-            ),
-          ),
+          Text('Request Service', style: AppText.h3),
           const SizedBox(height: 4),
-          const Text(
-            'Tell us a bit about what you need',
-            style: TextStyle(fontSize: 13, color: Color(0xFFCBC3D7)),
-          ),
+          Text('Tell us a bit about what you need',
+              style: AppText.bodySmall),
           const SizedBox(height: 24),
 
-          // Note field
-          const _SheetLabel('Note'),
-          const SizedBox(height: 8),
-          _SheetInput(
+          PremiumInputField(
             controller: widget.noteController,
             hintText: 'Describe what you need…',
+            label: 'Note',
+            prefixIcon: Icons.notes_rounded,
             maxLines: 3,
-            icon: Icons.notes_rounded,
           ),
           const SizedBox(height: 16),
 
-          // Address field
-          const _SheetLabel('Address'),
-          const SizedBox(height: 8),
-          _SheetInput(
+          PremiumInputField(
             controller: widget.addressController,
             hintText: 'Your service address',
-            maxLines: 1,
-            icon: Icons.location_on_outlined,
+            label: 'Address',
+            prefixIcon: Icons.location_on_outlined,
           ),
           const SizedBox(height: 24),
 
-          // Submit
-          GestureDetector(
+          GradientButton(
+            label: 'Submit Request',
+            icon: Icons.send_rounded,
+            isLoading: _isSubmitting,
+            height: 54,
             onTap: _isSubmitting
                 ? null
                 : () async {
@@ -788,118 +574,8 @@ class _RequestSheetState extends State<_RequestSheet> {
                     await widget.onSubmit();
                     if (mounted) setState(() => _isSubmitting = false);
                   },
-            child: AnimatedOpacity(
-              opacity: _isSubmitting ? 0.7 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                height: 54,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x44A078FF),
-                      blurRadius: 20,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF3C0091)),
-                        ),
-                      )
-                    : const Text(
-                        'Submit Request',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF3C0091),
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-              ),
-            ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SheetLabel extends StatelessWidget {
-  final String text;
-  const _SheetLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: Color(0xFFCBC3D7),
-        letterSpacing: 0.3,
-      ),
-    );
-  }
-}
-
-class _SheetInput extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final int maxLines;
-  final IconData icon;
-
-  const _SheetInput({
-    required this.controller,
-    required this.hintText,
-    required this.maxLines,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: const TextStyle(fontSize: 15, color: Color(0xFFDAE2FD)),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(
-          fontSize: 15,
-          color: const Color(0xFFCBC3D7).withValues(alpha: 0.30),
-        ),
-        filled: true,
-        fillColor: const Color(0xFF0D1528),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        suffixIcon: Icon(icon,
-            size: 18,
-            color: const Color(0xFFCBC3D7).withValues(alpha: 0.35)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.50)),
-        ),
       ),
     );
   }

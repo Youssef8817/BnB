@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:b_and_b/constants.dart';
 import 'package:b_and_b/models/user.dart';
 import 'package:b_and_b/services/api_service.dart';
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:b_and_b/widgets/role_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -17,15 +18,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
-  bool _isLoading     = true;
-  bool _editingPhone  = false;
-  bool _savingPhone   = false;
+  bool _isLoading    = true;
+  bool _editingPhone = false;
+  bool _savingPhone  = false;
   final _phoneController = TextEditingController();
-
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   @override
   void initState() {
@@ -42,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUser() async {
     setState(() => _isLoading = true);
     try {
-      final prefs   = await SharedPreferences.getInstance();
+      final prefs    = await SharedPreferences.getInstance();
       final userJson = prefs.getString(Constants.userKey);
       if (userJson != null) {
         setState(() {
@@ -62,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
-            backgroundColor: const Color(0xFF93000A),
+            backgroundColor: AppColors.errorBg,
           ),
         );
       }
@@ -93,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
-            backgroundColor: const Color(0xFF93000A),
+            backgroundColor: AppColors.errorBg,
           ),
         );
       }
@@ -111,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
-            backgroundColor: const Color(0xFF93000A),
+            backgroundColor: AppColors.errorBg,
           ),
         );
       }
@@ -119,146 +115,178 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAddServiceDialog() {
-    String selectedType       = 'plumbing';
-    final descController      = TextEditingController();
-    final priceController     = TextEditingController();
-    final unitController      = TextEditingController();
+    String selectedType          = 'plumbing';
+    final descController         = TextEditingController();
+    final priceController        = TextEditingController();
+    final unitController         = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF171F33),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text(
-            'Add Service',
-            style: TextStyle(color: _onSurface, fontWeight: FontWeight.w700),
-          ),
-          content: SingleChildScrollView(
+        builder: (ctx, setDialogState) => Dialog(
+          backgroundColor: AppColors.surface,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DropdownButtonFormField<String>(
-                  value: selectedType,
-                  dropdownColor: const Color(0xFF171F33),
-                  style: const TextStyle(color: _onSurface),
-                  decoration: _dialogInputDecoration('Service Type'),
-                  items: const [
-                    DropdownMenuItem(value: 'plumbing',   child: Text('Plumbing')),
-                    DropdownMenuItem(value: 'painting',   child: Text('Painting')),
-                    DropdownMenuItem(value: 'tiling',     child: Text('Tiling')),
-                    DropdownMenuItem(value: 'electrical', child: Text('Electrical')),
-                    DropdownMenuItem(value: 'carpentry',  child: Text('Carpentry')),
-                    DropdownMenuItem(value: 'finishing',  child: Text('Finishing')),
-                  ],
-                  onChanged: (v) => setDialogState(() => selectedType = v!),
+                Text('Add Service', style: AppText.h4),
+                const SizedBox(height: 20),
+                // Service type dropdown
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.10)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedType,
+                      dropdownColor: AppColors.surfaceHigh,
+                      style: const TextStyle(
+                          color: AppColors.textPrimary, fontSize: 15),
+                      icon: const Icon(Icons.expand_more_rounded,
+                          color: AppColors.textMuted),
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'plumbing',
+                            child: Text('Plumbing')),
+                        DropdownMenuItem(
+                            value: 'painting',
+                            child: Text('Painting')),
+                        DropdownMenuItem(
+                            value: 'tiling', child: Text('Tiling')),
+                        DropdownMenuItem(
+                            value: 'electrical',
+                            child: Text('Electrical')),
+                        DropdownMenuItem(
+                            value: 'carpentry',
+                            child: Text('Carpentry')),
+                        DropdownMenuItem(
+                            value: 'finishing',
+                            child: Text('Finishing')),
+                      ],
+                      onChanged: (v) =>
+                          setDialogState(() => selectedType = v!),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                TextField(
+                const SizedBox(height: 14),
+                _DialogInput(
                   controller: descController,
+                  hintText: 'Description',
                   maxLines: 2,
-                  style: const TextStyle(color: _onSurface),
-                  decoration: _dialogInputDecoration('Description'),
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(color: _onSurface),
-                  decoration: _dialogInputDecoration('Price per unit'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _DialogInput(
+                        controller: priceController,
+                        hintText: 'Price per unit',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _DialogInput(
+                        controller: unitController,
+                        hintText: 'Unit (e.g. hour)',
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: unitController,
-                  style: const TextStyle(color: _onSurface),
-                  decoration: _dialogInputDecoration('Unit (e.g. hour, m²)'),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(ctx).pop(),
+                        child: GlassBox(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                          child: const Text('Cancel',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          if (descController.text.trim().isEmpty ||
+                              priceController.text.trim().isEmpty ||
+                              unitController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Please fill all fields')),
+                            );
+                            return;
+                          }
+                          Navigator.of(ctx).pop();
+                          try {
+                            await ApiService.createWorkerService({
+                              'type': selectedType,
+                              'description':
+                                  descController.text.trim(),
+                              'price_per_unit':
+                                  double.tryParse(
+                                          priceController.text.trim()) ??
+                                      0,
+                              'unit': unitController.text.trim(),
+                              'is_available': true,
+                            });
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Service added!')),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: AppColors.errorBg,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: AppColors.gradientPrimary,
+                          ),
+                          child: const Text(
+                            'Add',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('Cancel',
-                  style: TextStyle(color: _onSurfaceVariant.withValues(alpha: 0.7))),
-            ),
-            GestureDetector(
-              onTap: () async {
-                if (descController.text.trim().isEmpty ||
-                    priceController.text.trim().isEmpty ||
-                    unitController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
-                  return;
-                }
-                Navigator.of(ctx).pop();
-                try {
-                  await ApiService.createWorkerService({
-                    'type': selectedType,
-                    'description': descController.text.trim(),
-                    'price_per_unit':
-                        double.tryParse(priceController.text.trim()) ?? 0,
-                    'unit': unitController.text.trim(),
-                    'is_available': true,
-                  });
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Service added!')),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: const Color(0xFF93000A),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                  ),
-                ),
-                child: const Text(
-                  'Add',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF3C0091),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
-      ),
-    );
-  }
-
-  InputDecoration _dialogInputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: _onSurfaceVariant.withValues(alpha: 0.7)),
-      filled: true,
-      fillColor: const Color(0xFF0D1528),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _primary.withValues(alpha: 0.50)),
       ),
     );
   }
@@ -266,133 +294,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Purple glow — top-right
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          // Blue glow — bottom-left
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // Content
           SafeArea(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: _primary),
-                  )
+                    child: CircularProgressIndicator(
+                        color: AppColors.accent))
                 : _user == null
-                    ? const Center(
-                        child: Text(
-                          'No user data',
-                          style: TextStyle(color: _onSurfaceVariant),
-                        ),
-                      )
+                    ? Center(
+                        child: Text('No user data',
+                            style: AppText.bodySmall))
                     : SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
+                        padding:
+                            const EdgeInsets.fromLTRB(24, 24, 24, 40),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Back arrow
+                            // Back
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: GestureDetector(
-                                onTap: () => context.pop(),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.06),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.10)),
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: _primary,
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
+                              child: BackButton2(
+                                  onTap: () => context.pop()),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
 
-                            // Brand
-                            const Text(
-                              'B&B',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.w700,
-                                color: _primary,
-                                letterSpacing: -1.0,
-                                height: 1.1,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Heading
-                            const Text(
-                              'My Profile',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w700,
-                                color: _onSurface,
-                                letterSpacing: -0.8,
-                                height: 1.1,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _user!.email ?? '',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: _onSurfaceVariant,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 28),
-
-                            // Avatar + role
+                            // Avatar + name
                             Center(
                               child: Column(
                                 children: [
                                   Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration: const BoxDecoration(
+                                    width: 88,
+                                    height: 88,
+                                    decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                                      ),
+                                      gradient: AppColors.gradientPrimary,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Color(0x44A078FF),
-                                          blurRadius: 20,
-                                          offset: Offset(0, 6),
+                                          color: AppColors.accentDeep
+                                              .withValues(alpha: 0.40),
+                                          blurRadius: 28,
+                                          offset: const Offset(0, 8),
                                         ),
                                       ],
                                     ),
@@ -403,14 +350,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 : '?')
                                             .toUpperCase(),
                                         style: const TextStyle(
-                                          fontSize: 32,
+                                          fontSize: 36,
                                           fontWeight: FontWeight.w700,
-                                          color: Color(0xFF3C0091),
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 14),
+                                  ShaderMask(
+                                    shaderCallback: (r) =>
+                                        const LinearGradient(
+                                      colors: [
+                                        Color(0xFFB69EFF),
+                                        Color(0xFF4FC3F7)
+                                      ],
+                                    ).createShader(r),
+                                    child: Text(
+                                      _user!.name,
+                                      style: AppText.h2.copyWith(
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(_user!.email ?? '',
+                                      style: AppText.bodySmall),
+                                  const SizedBox(height: 10),
                                   RoleBadge(role: _user!.role ?? ''),
                                 ],
                               ),
@@ -418,7 +383,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 28),
 
                             // Info card
-                            _GlassCard(
+                            GlassBox(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
                               child: Column(
                                 children: [
                                   _InfoRow(
@@ -426,22 +393,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     label: 'Name',
                                     value: _user!.name,
                                   ),
-                                  _Divider(),
+                                  Divider(
+                                      height: 1,
+                                      color: Colors.white
+                                          .withValues(alpha: 0.06)),
                                   _InfoRow(
                                     icon: Icons.alternate_email,
                                     label: 'Email',
                                     value: _user!.email ?? '',
                                   ),
-                                  _Divider(),
-
-                                  // Phone row with inline edit
+                                  Divider(
+                                      height: 1,
+                                      color: Colors.white
+                                          .withValues(alpha: 0.06)),
                                   if (_editingPhone)
                                     _PhoneEditRow(
                                       controller: _phoneController,
                                       isSaving: _savingPhone,
                                       onSave: _savePhone,
-                                      onCancel: () =>
-                                          setState(() => _editingPhone = false),
+                                      onCancel: () => setState(
+                                          () => _editingPhone = false),
                                     )
                                   else
                                     _InfoRow(
@@ -452,12 +423,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         onTap: () {
                                           _phoneController.text =
                                               _user!.phone ?? '';
-                                          setState(() => _editingPhone = true);
+                                          setState(
+                                              () => _editingPhone = true);
                                         },
                                         child: Icon(
                                           Icons.edit_outlined,
                                           size: 16,
-                                          color: _primary.withValues(alpha: 0.7),
+                                          color: AppColors.accent
+                                              .withValues(alpha: 0.7),
                                         ),
                                       ),
                                     ),
@@ -468,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             // Worker actions
                             if (_user!.role == 'worker')
-                              _ActionButton(
+                              _NavButton(
                                 icon: Icons.add_circle_outline,
                                 label: 'Add Service',
                                 onTap: _showAddServiceDialog,
@@ -476,51 +449,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             // User actions
                             if (_user!.role != 'worker')
-                              _ActionButton(
+                              _NavButton(
                                 icon: Icons.list_alt_outlined,
                                 label: 'My Requests',
-                                onTap: () => context.push('/my-requests'),
+                                onTap: () =>
+                                    context.push('/my-requests'),
                               ),
 
                             const SizedBox(height: 16),
 
-                            // Logout button
-                            GestureDetector(
+                            GradientButton(
+                              label: 'Logout',
+                              icon: Icons.logout_rounded,
                               onTap: _logout,
-                              child: Container(
-                                height: 54,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(999),
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x44A078FF),
-                                      blurRadius: 20,
-                                      offset: Offset(0, 6),
-                                    ),
-                                  ],
-                                ),
-                                alignment: Alignment.center,
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.logout,
-                                        color: Color(0xFF3C0091), size: 18),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Logout',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF3C0091),
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              height: 54,
                             ),
                           ],
                         ),
@@ -528,33 +470,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ── Glass card ────────────────────────────────────────────────────────────────
-
-class _GlassCard extends StatelessWidget {
-  final Widget child;
-  const _GlassCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 48,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
@@ -580,8 +495,9 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
-          Icon(icon, size: 18,
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.6)),
+          Icon(icon,
+              size: 18,
+              color: AppColors.accent.withValues(alpha: 0.6)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -589,21 +505,10 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: const Color(0xFFCBC3D7).withValues(alpha: 0.5),
-                    letterSpacing: 0.5,
-                  ),
+                  style: AppText.label,
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFFDAE2FD),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(value, style: AppText.body.copyWith(fontSize: 15)),
               ],
             ),
           ),
@@ -635,21 +540,23 @@ class _PhoneEditRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(Icons.phone_outlined, size: 18,
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.6)),
+          Icon(Icons.phone_outlined,
+              size: 18,
+              color: AppColors.accent.withValues(alpha: 0.6)),
           const SizedBox(width: 12),
           Expanded(
             child: TextFormField(
               controller: controller,
               autofocus: true,
               keyboardType: TextInputType.phone,
-              style: const TextStyle(fontSize: 15, color: Color(0xFFDAE2FD)),
+              style: const TextStyle(
+                  fontSize: 15, color: AppColors.textPrimary),
               decoration: InputDecoration(
                 isDense: true,
                 filled: true,
-                fillColor: const Color(0xFF0D1528),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                fillColor: Colors.white.withValues(alpha: 0.04),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -662,8 +569,8 @@ class _PhoneEditRow extends StatelessWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                      color: const Color(0xFFD0BCFF).withValues(alpha: 0.50)),
+                  borderSide: const BorderSide(
+                      color: AppColors.accentDeep, width: 1.5),
                 ),
               ),
             ),
@@ -674,18 +581,18 @@ class _PhoneEditRow extends StatelessWidget {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Color(0xFFD0BCFF)),
+                      strokeWidth: 2, color: AppColors.accent),
                 )
               : GestureDetector(
                   onTap: onSave,
                   child: const Icon(Icons.check_circle_outline,
-                      color: Color(0xFFA078FF), size: 22),
+                      color: AppColors.accent, size: 22),
                 ),
           const SizedBox(width: 4),
           GestureDetector(
             onTap: onCancel,
             child: Icon(Icons.cancel_outlined,
-                color: const Color(0xFFCBC3D7).withValues(alpha: 0.5),
+                color: AppColors.textMuted.withValues(alpha: 0.5),
                 size: 22),
           ),
         ],
@@ -694,26 +601,14 @@ class _PhoneEditRow extends StatelessWidget {
   }
 }
 
-// ── Divider ───────────────────────────────────────────────────────────────────
+// ── Nav button ────────────────────────────────────────────────────────────────
 
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      color: Colors.white.withValues(alpha: 0.06),
-    );
-  }
-}
-
-// ── Action button ─────────────────────────────────────────────────────────────
-
-class _ActionButton extends StatelessWidget {
+class _NavButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
-  const _ActionButton({
+  const _NavButton({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -725,33 +620,77 @@ class _ActionButton extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-          ),
+        child: GlassBox(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFFD0BCFF), size: 20),
+              Icon(icon, color: AppColors.accent, size: 20),
               const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFDAE2FD),
-                ),
-              ),
+              Text(label,
+                  style: AppText.body.copyWith(
+                      fontSize: 15, fontWeight: FontWeight.w500)),
               const Spacer(),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: const Color(0xFFCBC3D7).withValues(alpha: 0.4),
+                color: AppColors.textMuted.withValues(alpha: 0.4),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Dialog input ──────────────────────────────────────────────────────────────
+
+class _DialogInput extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final int maxLines;
+  final TextInputType keyboardType;
+
+  const _DialogInput({
+    required this.controller,
+    required this.hintText,
+    this.maxLines     = 1,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      style: const TextStyle(
+          fontSize: 14, color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontSize: 14,
+          color: AppColors.textMuted.withValues(alpha: 0.30),
+        ),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.04),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide:
+              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide:
+              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+              color: AppColors.accentDeep, width: 1.5),
         ),
       ),
     );

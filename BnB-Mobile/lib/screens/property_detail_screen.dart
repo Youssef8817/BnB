@@ -4,6 +4,7 @@ import 'package:b_and_b/constants.dart';
 import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/models/user.dart';
 import 'package:b_and_b/services/api_service.dart';
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,11 +25,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   User? _owner;
   bool  _isOwner    = false;
   int   _imageIndex = 0;
-
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   @override
   void initState() {
@@ -144,22 +140,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   void _showSuccess(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: const Color(0xFF1A1040)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.surface),
       );
 
   void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(msg), backgroundColor: const Color(0xFF93000A)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.errorBg),
       );
-
-  Color _statusColor(String s) {
-    switch (s.toLowerCase()) {
-      case 'available': return const Color(0xFF4CAF50);
-      case 'pending':   return const Color(0xFFFFB74D);
-      case 'sold':      return const Color(0xFF958EA0);
-      default:          return const Color(0xFF958EA0);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,42 +153,18 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     final images = p.images;
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // ── Background glows ────────────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Main scroll ─────────────────────────────────────────
           CustomScrollView(
             slivers: [
               // Image hero header
               SliverToBoxAdapter(
                 child: Stack(
                   children: [
-                    // Image PageView
                     SizedBox(
                       height: 320,
                       child: images.isEmpty
@@ -212,8 +174,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               onPageChanged: (i) =>
                                   setState(() => _imageIndex = i),
                               itemBuilder: (_, i) {
-                                final tag =
-                                    'property_image_${p.id}_$i';
+                                final tag = 'property_image_${p.id}_$i';
                                 return GestureDetector(
                                   onTap: () => _openFullscreen(i),
                                   child: Hero(
@@ -221,8 +182,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                     child: CachedNetworkImage(
                                       imageUrl: images[i].fullUrl,
                                       fit: BoxFit.cover,
-                                      placeholder: (_, __) =>
-                                          _imgPlaceholder(),
+                                      placeholder: (_, __) => _imgPlaceholder(),
                                       errorWidget: (_, __, ___) =>
                                           _imgPlaceholder(),
                                     ),
@@ -232,49 +192,32 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                             ),
                     ),
 
-                    // Bottom gradient over image
+                    // Bottom gradient
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      height: 120,
+                      height: 140,
                       child: Container(
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Color(0xE60B1326)],
+                            colors: [Colors.transparent, Color(0xF0060B18)],
                           ),
                         ),
                       ),
                     ),
 
-                    // Back button
+                    // Back + menu
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
-                              onTap: () => Navigator.of(context).pop(),
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color:
-                                      Colors.black.withValues(alpha: 0.40),
-                                  border: Border.all(
-                                      color: Colors.white
-                                          .withValues(alpha: 0.15)),
-                                ),
-                                child: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: Colors.white,
-                                    size: 16),
-                              ),
-                            ),
+                            BackButton2(
+                                onTap: () => Navigator.of(context).pop()),
                             if (_isOwner)
                               _OwnerMenu(
                                 onEdit: () async {
@@ -282,8 +225,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                       '/properties/add',
                                       extra: p);
                                   if (result == true && mounted) {
-                                    _showSuccess(
-                                        'Property updated successfully');
+                                    _showSuccess('Property updated successfully');
                                   }
                                 },
                                 onDelete: _confirmDelete,
@@ -307,14 +249,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               duration: const Duration(milliseconds: 250),
                               width: _imageIndex == i ? 20 : 6,
                               height: 6,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 3),
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(999),
                                 color: _imageIndex == i
-                                    ? _primary
-                                    : Colors.white
-                                        .withValues(alpha: 0.30),
+                                    ? AppColors.accent
+                                    : Colors.white.withValues(alpha: 0.30),
                               ),
                             ),
                           ),
@@ -336,74 +276,30 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              p.title,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: _onSurface,
-                                letterSpacing: -0.5,
-                                height: 1.2,
-                              ),
-                            ),
+                            child: Text(p.title, style: AppText.h2),
                           ),
                           const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: _statusColor(p.status)
-                                  .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                  color: _statusColor(p.status)
-                                      .withValues(alpha: 0.4)),
-                            ),
-                            child: Text(
-                              p.status.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: _statusColor(p.status),
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ),
+                          StatusBadge(status: p.status),
                         ],
                       ),
                       const SizedBox(height: 8),
 
-                      // Price
-                      Text(
-                        p.formattedPrice,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: _primary,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
+                      Text(p.formattedPrice, style: AppText.price),
                       const SizedBox(height: 6),
 
-                      // Location
                       if (p.city.isNotEmpty || p.location.isNotEmpty)
                         Row(
                           children: [
                             Icon(Icons.location_on_outlined,
                                 size: 15,
-                                color: _onSurfaceVariant
-                                    .withValues(alpha: 0.6)),
+                                color: AppColors.textMuted.withValues(alpha: 0.6)),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 [p.city, p.location]
                                     .where((s) => s.isNotEmpty)
                                     .join(', '),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: _onSurfaceVariant
-                                      .withValues(alpha: 0.7),
-                                ),
+                                style: AppText.bodySmall,
                               ),
                             ),
                           ],
@@ -438,68 +334,31 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       const SizedBox(height: 24),
 
                       // Description
-                      const Text(
-                        'Description',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: _onSurface,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
+                      Text('Description', style: AppText.h4),
                       const SizedBox(height: 10),
-                      Container(
+                      GlassBox(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.04),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08)),
-                        ),
                         child: Text(
                           p.description,
-                          style: TextStyle(
-                            fontSize: 14,
-                            height: 1.6,
-                            color: _onSurfaceVariant.withValues(alpha: 0.85),
-                          ),
+                          style: AppText.body,
                         ),
                       ),
 
                       const SizedBox(height: 24),
 
                       // Owner card
-                      const Text(
-                        'Owner',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: _onSurface,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
+                      Text('Owner', style: AppText.h4),
                       const SizedBox(height: 10),
-                      Container(
+                      GlassBox(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.04),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08)),
-                        ),
                         child: Row(
                           children: [
                             Container(
                               width: 44,
                               height: 44,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFA078FF),
-                                    Color(0xFF00A2E6)
-                                  ],
-                                ),
+                                gradient: AppColors.gradientPrimary,
                               ),
                               child: Center(
                                 child: Text(
@@ -509,7 +368,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF3C0091),
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -517,25 +376,16 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _owner?.name ?? 'Loading...',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: _onSurface,
-                                    ),
+                                    _owner?.name ?? 'Loading…',
+                                    style: AppText.h4.copyWith(fontSize: 15),
                                   ),
                                   if (_owner?.email != null)
                                     Text(
                                       _owner!.email!,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: _onSurfaceVariant
-                                            .withValues(alpha: 0.6),
-                                      ),
+                                      style: AppText.bodySmall,
                                     ),
                                 ],
                               ),
@@ -545,44 +395,30 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                               child: Container(
                                 width: 40,
                                 height: 40,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFFA078FF),
-                                      Color(0xFF00A2E6)
-                                    ],
-                                  ),
+                                  gradient: AppColors.gradientPrimary,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Color(0x33A078FF),
+                                      color: AppColors.accentDeep
+                                          .withValues(alpha: 0.35),
                                       blurRadius: 12,
-                                      offset: Offset(0, 4),
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
                                 ),
-                                child: const Icon(
-                                    Icons.phone_rounded,
-                                    color: Color(0xFF3C0091),
-                                    size: 18),
+                                child: const Icon(Icons.phone_rounded,
+                                    color: Colors.white, size: 18),
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      // Owner status changer
+                      // Status changer (owner only)
                       if (_isOwner) ...[
                         const SizedBox(height: 24),
-                        const Text(
-                          'Change Status',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: _onSurface,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
+                        Text('Change Status', style: AppText.h4),
                         const SizedBox(height: 10),
                         _StatusSelector(
                           current: p.status,
@@ -593,45 +429,11 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
                       const SizedBox(height: 28),
 
-                      // Call CTA button
-                      GestureDetector(
+                      GradientButton(
+                        label: 'Contact Owner',
+                        icon: Icons.phone_rounded,
                         onTap: _callOwner,
-                        child: Container(
-                          height: 54,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFA078FF),
-                                Color(0xFF00A2E6)
-                              ],
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x44A078FF),
-                                blurRadius: 20,
-                                offset: Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.phone_rounded,
-                                  color: Color(0xFF3C0091), size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'Contact Owner',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF3C0091),
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        height: 54,
                       ),
                     ],
                   ),
@@ -645,10 +447,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 
   Widget _imgPlaceholder() => Container(
-        color: const Color(0xFF111827),
-        child: const Center(
+        color: AppColors.card,
+        child: Center(
           child: Icon(Icons.home_work_outlined,
-              color: Color(0x33D0BCFF), size: 64),
+              color: AppColors.accent.withValues(alpha: 0.20), size: 64),
         ),
       );
 
@@ -656,7 +458,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => Dialog(
-        backgroundColor: const Color(0xFF111827),
+        backgroundColor: AppColors.surface,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
@@ -665,21 +467,11 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Delete Property',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFDAE2FD),
-                ),
-              ),
+              Text('Delete Property', style: AppText.h4),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Are you sure you want to delete this property? This cannot be undone.',
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFFCBC3D7),
-                    height: 1.5),
+                style: AppText.body,
               ),
               const SizedBox(height: 24),
               Row(
@@ -687,19 +479,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => Navigator.of(context).pop(false),
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color:
-                                  Colors.white.withValues(alpha: 0.10)),
-                        ),
-                        alignment: Alignment.center,
+                      child: GlassBox(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: const Text('Cancel',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Color(0xFFCBC3D7),
+                                color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w600)),
                       ),
                     ),
@@ -709,20 +494,18 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                     child: GestureDetector(
                       onTap: () => Navigator.of(context).pop(true),
                       child: Container(
-                        height: 44,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF93000A)
-                              .withValues(alpha: 0.25),
+                          color: AppColors.error.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: const Color(0xFFFFB4AB)
-                                  .withValues(alpha: 0.4)),
+                              color: AppColors.error.withValues(alpha: 0.40)),
                         ),
-                        alignment: Alignment.center,
                         child: const Text(
                           'Delete',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(0xFFFFB4AB),
+                            color: AppColors.error,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -740,7 +523,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   }
 }
 
-// ── Owner menu (edit / delete) ────────────────────────────────────────────────
+// ── Owner menu ────────────────────────────────────────────────────────────────
 
 class _OwnerMenu extends StatelessWidget {
   final VoidCallback onEdit;
@@ -750,7 +533,7 @@ class _OwnerMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      color: const Color(0xFF171F33),
+      color: AppColors.surfaceHigh,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       onSelected: (v) {
         if (v == 'edit') onEdit();
@@ -760,18 +543,17 @@ class _OwnerMenu extends StatelessWidget {
         const PopupMenuItem(
           value: 'edit',
           child: Row(children: [
-            Icon(Icons.edit_outlined, color: Color(0xFFD0BCFF), size: 18),
+            Icon(Icons.edit_outlined, color: AppColors.accent, size: 18),
             SizedBox(width: 10),
-            Text('Edit', style: TextStyle(color: Color(0xFFDAE2FD))),
+            Text('Edit', style: TextStyle(color: AppColors.textPrimary)),
           ]),
         ),
         const PopupMenuItem(
           value: 'delete',
           child: Row(children: [
-            Icon(Icons.delete_outline_rounded,
-                color: Color(0xFFFFB4AB), size: 18),
+            Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
             SizedBox(width: 10),
-            Text('Delete', style: TextStyle(color: Color(0xFFFFB4AB))),
+            Text('Delete', style: TextStyle(color: AppColors.error)),
           ]),
         ),
       ],
@@ -781,8 +563,7 @@ class _OwnerMenu extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.black.withValues(alpha: 0.40),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
         child: const Icon(Icons.more_horiz_rounded,
             color: Colors.white, size: 20),
@@ -803,33 +584,15 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
+      child: GlassBox(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        ),
         child: Column(
           children: [
-            Icon(icon, size: 20, color: const Color(0xFFD0BCFF)),
+            Icon(icon, size: 20, color: AppColors.accent),
             const SizedBox(height: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFDAE2FD),
-              ),
-            ),
-            Text(
-              sublabel,
-              style: TextStyle(
-                fontSize: 11,
-                color: const Color(0xFFCBC3D7).withValues(alpha: 0.6),
-              ),
-            ),
+            Text(label, style: AppText.h4.copyWith(fontSize: 15)),
+            Text(sublabel,
+                style: AppText.bodySmall.copyWith(fontSize: 11)),
           ],
         ),
       ),
@@ -837,7 +600,7 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ── Status selector (owner only) ──────────────────────────────────────────────
+// ── Status selector ───────────────────────────────────────────────────────────
 
 class _StatusSelector extends StatefulWidget {
   final String current;
@@ -861,14 +624,11 @@ class _StatusSelectorState extends State<_StatusSelector> {
     _selected = widget.current;
   }
 
-  Color _statusColor(String s) {
-    switch (s) {
-      case 'available': return const Color(0xFF4CAF50);
-      case 'pending':   return const Color(0xFFFFB74D);
-      case 'sold':      return const Color(0xFF958EA0);
-      default:          return const Color(0xFF958EA0);
-    }
-  }
+  Color _statusColor(String s) => switch (s) {
+        'available' => AppColors.success,
+        'pending'   => AppColors.warning,
+        _           => AppColors.textMuted,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -906,7 +666,7 @@ class _StatusSelectorState extends State<_StatusSelector> {
                         ? Icons.radio_button_checked_rounded
                         : Icons.radio_button_off_rounded,
                     size: 16,
-                    color: active ? color : const Color(0xFFCBC3D7),
+                    color: active ? color : AppColors.textMuted,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -914,7 +674,7 @@ class _StatusSelectorState extends State<_StatusSelector> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: active ? color : const Color(0xFFCBC3D7),
+                      color: active ? color : AppColors.textMuted,
                     ),
                   ),
                 ],

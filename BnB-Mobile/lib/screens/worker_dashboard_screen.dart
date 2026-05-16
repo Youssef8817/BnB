@@ -1,3 +1,4 @@
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:b_and_b/services/api_service.dart';
 import 'package:b_and_b/models/worker_service.dart';
@@ -14,9 +15,6 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  static const Color _bg      = Color(0xFF0B1326);
-  static const Color _primary = Color(0xFFD0BCFF);
-
   @override
   void initState() {
     super.initState();
@@ -32,37 +30,13 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Purple glow — top-right ─────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          // ── Blue glow — bottom-left ─────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Content ─────────────────────────────────────────────
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,43 +46,15 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen>
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.06),
-                            border: Border.all(
-                                color:
-                                    Colors.white.withValues(alpha: 0.12)),
-                          ),
-                          child: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: _primary,
-                              size: 16),
-                        ),
-                      ),
+                      BackButton2(onTap: () => Navigator.of(context).pop()),
                       const SizedBox(width: 16),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Worker Dashboard',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFDAE2FD),
-                              letterSpacing: -0.5,
-                            ),
-                          ),
+                          Text('Worker Dashboard', style: AppText.h3),
                           Text(
                             'Manage services & requests',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFFCBC3D7),
-                            ),
+                            style: AppText.bodySmall,
                           ),
                         ],
                       ),
@@ -133,21 +79,19 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen>
                       controller: _tabController,
                       indicator: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                        ),
-                        boxShadow: const [
+                        gradient: AppColors.gradientPrimary,
+                        boxShadow: [
                           BoxShadow(
-                            color: Color(0x33A078FF),
+                            color: AppColors.accentDeep.withValues(alpha: 0.35),
                             blurRadius: 12,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       dividerColor: Colors.transparent,
-                      labelColor: const Color(0xFF3C0091),
-                      unselectedLabelColor: const Color(0xFFCBC3D7),
+                      labelColor: Colors.white,
+                      unselectedLabelColor: AppColors.textMuted,
                       labelStyle: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -166,7 +110,6 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen>
 
                 const SizedBox(height: 16),
 
-                // Tab views
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -199,10 +142,6 @@ class _MyServicesTab extends StatefulWidget {
 class _MyServicesTabState extends State<_MyServicesTab> {
   List<WorkerService> _services = [];
   bool _isLoading = true;
-
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   static const _typeIcons = {
     'plumbing':   Icons.plumbing,
@@ -244,18 +183,16 @@ class _MyServicesTabState extends State<_MyServicesTab> {
   }
 
   void _showSuccess(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: const Color(0xFF1A1040)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.surface),
       );
 
   void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(msg), backgroundColor: const Color(0xFF93000A)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.errorBg),
       );
 
   Future<void> _showEditDialog(WorkerService service) async {
     final descController  = TextEditingController(text: service.description);
-    final priceController =
-        TextEditingController(text: service.pricePerUnit.toString());
+    final priceController = TextEditingController(text: service.pricePerUnit.toString());
     final unitController  = TextEditingController(text: service.unit);
     bool isAvailable      = service.isAvailable;
 
@@ -263,26 +200,20 @@ class _MyServicesTabState extends State<_MyServicesTab> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => Dialog(
-          backgroundColor: const Color(0xFF111827),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Edit Service',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFFDAE2FD),
-                  ),
-                ),
+                Text('Edit Service', style: AppText.h4),
                 const SizedBox(height: 20),
 
-                const _DialogLabel('Description'),
+                Text('Description',
+                    style: AppText.bodySmall.copyWith(
+                        fontWeight: FontWeight.w500, letterSpacing: 0.3)),
                 const SizedBox(height: 6),
                 _DialogInput(
                     controller: descController,
@@ -296,7 +227,10 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _DialogLabel('Price / unit'),
+                          Text('Price / unit',
+                              style: AppText.bodySmall.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.3)),
                           const SizedBox(height: 6),
                           _DialogInput(
                             controller: priceController,
@@ -311,7 +245,10 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _DialogLabel('Unit'),
+                          Text('Unit',
+                              style: AppText.bodySmall.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.3)),
                           const SizedBox(height: 6),
                           _DialogInput(
                             controller: unitController,
@@ -326,19 +263,19 @@ class _MyServicesTabState extends State<_MyServicesTab> {
 
                 // Availability toggle
                 GestureDetector(
-                  onTap: () =>
-                      setDialogState(() => isAvailable = !isAvailable),
-                  child: Container(
+                  onTap: () => setDialogState(() => isAvailable = !isAvailable),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: isAvailable
-                          ? const Color(0xFF4CAF50).withValues(alpha: 0.10)
+                          ? AppColors.success.withValues(alpha: 0.10)
                           : Colors.white.withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isAvailable
-                            ? const Color(0xFF4CAF50).withValues(alpha: 0.35)
+                            ? AppColors.success.withValues(alpha: 0.35)
                             : Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
@@ -349,8 +286,8 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                               ? Icons.toggle_on_rounded
                               : Icons.toggle_off_rounded,
                           color: isAvailable
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFFCBC3D7),
+                              ? AppColors.success
+                              : AppColors.textMuted,
                           size: 28,
                         ),
                         const SizedBox(width: 10),
@@ -360,8 +297,8 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: isAvailable
-                                ? const Color(0xFF4CAF50)
-                                : const Color(0xFFCBC3D7),
+                                ? AppColors.success
+                                : AppColors.textMuted,
                           ),
                         ),
                       ],
@@ -382,13 +319,11 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                             color: Colors.white.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color:
-                                    Colors.white.withValues(alpha: 0.10)),
+                                color: Colors.white.withValues(alpha: 0.10)),
                           ),
                           alignment: Alignment.center,
-                          child: const Text('Cancel',
-                              style: TextStyle(
-                                  color: Color(0xFFCBC3D7),
+                          child: Text('Cancel',
+                              style: AppText.body.copyWith(
                                   fontWeight: FontWeight.w600)),
                         ),
                       ),
@@ -399,12 +334,10 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                         onTap: () async {
                           Navigator.of(ctx).pop();
                           try {
-                            await ApiService.updateWorkerService(
-                                service.id, {
+                            await ApiService.updateWorkerService(service.id, {
                               'description': descController.text.trim(),
                               'price_per_unit':
-                                  double.tryParse(priceController.text
-                                          .trim()) ??
+                                  double.tryParse(priceController.text.trim()) ??
                                       service.pricePerUnit,
                               'unit': unitController.text.trim(),
                               'is_available': isAvailable,
@@ -419,19 +352,23 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                           height: 44,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFA078FF),
-                                Color(0xFF00A2E6)
-                              ],
-                            ),
+                            gradient: AppColors.gradientPrimary,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accentDeep
+                                    .withValues(alpha: 0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           alignment: Alignment.center,
                           child: const Text(
                             'Save',
                             style: TextStyle(
-                              color: Color(0xFF3C0091),
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
+                              fontSize: 14,
                             ),
                           ),
                         ),
@@ -451,7 +388,7 @@ class _MyServicesTabState extends State<_MyServicesTab> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: _primary));
+          child: CircularProgressIndicator(color: AppColors.accent));
     }
     if (_services.isEmpty) {
       return _buildEmpty(
@@ -461,27 +398,26 @@ class _MyServicesTabState extends State<_MyServicesTab> {
       );
     }
     return RefreshIndicator(
-      color: _primary,
-      backgroundColor: const Color(0xFF171F33),
+      color: AppColors.accent,
+      backgroundColor: AppColors.surface,
       onRefresh: _load,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         itemCount: _services.length,
         itemBuilder: (_, i) {
           final s    = _services[i];
-          final icon =
-              _typeIcons[s.type.toLowerCase()] ?? Icons.build_rounded;
+          final icon = _typeIcons[s.type.toLowerCase()] ?? Icons.build_rounded;
+
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(18),
-              border:
-                  Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
+                  color: Colors.black.withValues(alpha: 0.20),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -489,18 +425,18 @@ class _MyServicesTabState extends State<_MyServicesTab> {
             ),
             child: Row(
               children: [
-                // Icon
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [Color(0xFFA078FF), Color(0xFF6D3BD7)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.accent, AppColors.accentDeep],
                     ),
                   ),
-                  child:
-                      Icon(icon, color: Colors.white, size: 22),
+                  child: Icon(icon, color: Colors.white, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -509,26 +445,17 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                     children: [
                       Text(
                         s.type.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: _onSurface,
-                          letterSpacing: 0.3,
-                        ),
+                        style: AppText.h4.copyWith(
+                            fontSize: 14, letterSpacing: 0.3),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '\$${s.pricePerUnit.toStringAsFixed(0)} / ${s.unit}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: _primary,
-                        ),
+                        style: AppText.price.copyWith(fontSize: 13),
                       ),
                     ],
                   ),
                 ),
-                // Availability dot
                 Container(
                   width: 8,
                   height: 8,
@@ -536,41 +463,41 @@ class _MyServicesTabState extends State<_MyServicesTab> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: s.isAvailable
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFF958EA0),
+                        ? AppColors.success
+                        : AppColors.textMuted,
                   ),
                 ),
-                // Menu
                 PopupMenuButton<String>(
-                  color: const Color(0xFF171F33),
+                  color: AppColors.surfaceHigh,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                   icon: Icon(Icons.more_vert_rounded,
-                      color: _onSurfaceVariant.withValues(alpha: 0.5),
+                      color: AppColors.textMuted.withValues(alpha: 0.6),
                       size: 20),
                   onSelected: (v) {
                     if (v == 'edit') _showEditDialog(s);
                     if (v == 'delete') _delete(s.id);
                   },
                   itemBuilder: (_) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(children: [
                         Icon(Icons.edit_outlined,
-                            color: Color(0xFFD0BCFF), size: 18),
-                        SizedBox(width: 10),
+                            color: AppColors.accent, size: 18),
+                        const SizedBox(width: 10),
                         Text('Edit',
-                            style: TextStyle(color: Color(0xFFDAE2FD))),
+                            style: AppText.body.copyWith(fontSize: 14)),
                       ]),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(children: [
                         Icon(Icons.delete_outline_rounded,
-                            color: Color(0xFFFFB4AB), size: 18),
-                        SizedBox(width: 10),
+                            color: AppColors.error, size: 18),
+                        const SizedBox(width: 10),
                         Text('Delete',
-                            style: TextStyle(color: Color(0xFFFFB4AB))),
+                            style: AppText.body
+                                .copyWith(fontSize: 14, color: AppColors.error)),
                       ]),
                     ),
                   ],
@@ -598,10 +525,6 @@ class _IncomingRequestsTab extends StatefulWidget {
 class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
   List<ServiceRequest> _requests = [];
   bool _isLoading = true;
-
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   @override
   void initState() {
@@ -633,17 +556,16 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
   }
 
   void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(msg), backgroundColor: const Color(0xFF93000A)),
+        SnackBar(content: Text(msg), backgroundColor: AppColors.errorBg),
       );
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'pending':   return const Color(0xFFFFB74D);
-      case 'accepted':  return const Color(0xFF89CEFF);
-      case 'completed': return const Color(0xFF4CAF50);
-      case 'cancelled': return const Color(0xFF958EA0);
-      default:          return const Color(0xFF958EA0);
+      case 'pending':   return AppColors.warning;
+      case 'accepted':  return AppColors.cyan;
+      case 'completed': return AppColors.success;
+      case 'cancelled': return AppColors.textMuted;
+      default:          return AppColors.textMuted;
     }
   }
 
@@ -651,7 +573,7 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: _primary));
+          child: CircularProgressIndicator(color: AppColors.accent));
     }
     if (_requests.isEmpty) {
       return _buildEmpty(
@@ -661,14 +583,14 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
       );
     }
     return RefreshIndicator(
-      color: _primary,
-      backgroundColor: const Color(0xFF171F33),
+      color: AppColors.accent,
+      backgroundColor: AppColors.surface,
       onRefresh: _load,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         itemCount: _requests.length,
         itemBuilder: (_, i) {
-          final r          = _requests[i];
+          final r           = _requests[i];
           final statusColor = _statusColor(r.status);
           final date =
               '${r.createdAt.day.toString().padLeft(2, '0')}/'
@@ -681,11 +603,10 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
+                  color: Colors.black.withValues(alpha: 0.20),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -700,14 +621,9 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                     Container(
                       width: 40,
                       height: 40,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFFA078FF),
-                            Color(0xFF6D3BD7)
-                          ],
-                        ),
+                        gradient: AppColors.gradientPrimary,
                       ),
                       child: Center(
                         child: Text(
@@ -728,30 +644,17 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                           Text(
                             r.workerService?.type.toUpperCase() ??
                                 'Service #${r.workerServiceId}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _onSurface,
-                            ),
+                            style: AppText.h4.copyWith(fontSize: 14),
                           ),
-                          Text(
-                            date,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _onSurfaceVariant
-                                  .withValues(alpha: 0.6),
-                            ),
-                          ),
+                          Text(date, style: AppText.bodySmall.copyWith(fontSize: 12)),
                         ],
                       ),
                     ),
-                    // Status badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color:
-                            statusColor.withValues(alpha: 0.15),
+                        color: statusColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                             color: statusColor.withValues(alpha: 0.40)),
@@ -772,28 +675,17 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                 // Address & note
                 if (r.address.isNotEmpty || r.note.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Container(
-                    height: 1,
-                    color: Colors.white.withValues(alpha: 0.06),
-                  ),
+                  Divider(height: 1, color: Colors.white.withValues(alpha: 0.06)),
                   const SizedBox(height: 12),
                   if (r.address.isNotEmpty)
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
                             size: 13,
-                            color: _onSurfaceVariant
-                                .withValues(alpha: 0.5)),
+                            color: AppColors.textMuted.withValues(alpha: 0.5)),
                         const SizedBox(width: 5),
                         Expanded(
-                          child: Text(
-                            r.address,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _onSurfaceVariant
-                                  .withValues(alpha: 0.7),
-                            ),
-                          ),
+                          child: Text(r.address, style: AppText.bodySmall),
                         ),
                       ],
                     ),
@@ -804,19 +696,14 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                       children: [
                         Icon(Icons.notes_rounded,
                             size: 13,
-                            color: _onSurfaceVariant
-                                .withValues(alpha: 0.5)),
+                            color: AppColors.textMuted.withValues(alpha: 0.5)),
                         const SizedBox(width: 5),
                         Expanded(
                           child: Text(
                             r.note,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _onSurfaceVariant
-                                  .withValues(alpha: 0.7),
-                            ),
+                            style: AppText.bodySmall,
                           ),
                         ),
                       ],
@@ -833,8 +720,7 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                         child: _ActionBtn(
                           label: 'Accept',
                           icon: Icons.check_rounded,
-                          onTap: () =>
-                              _updateStatus(r.id, 'accepted'),
+                          onTap: () => _updateStatus(r.id, 'accepted'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -843,8 +729,7 @@ class _IncomingRequestsTabState extends State<_IncomingRequestsTab> {
                           label: 'Decline',
                           icon: Icons.close_rounded,
                           isDanger: true,
-                          onTap: () =>
-                              _updateStatus(r.id, 'cancelled'),
+                          onTap: () => _updateStatus(r.id, 'cancelled'),
                         ),
                       ),
                     ],
@@ -883,27 +768,15 @@ Widget _buildEmpty({
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.05),
-            border:
-                Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            color: AppColors.accentSoft,
+            border: Border.all(color: AppColors.border),
           ),
-          child: Icon(icon, color: const Color(0xFFD0BCFF), size: 36),
+          child: Icon(icon, color: AppColors.accent, size: 36),
         ),
         const SizedBox(height: 16),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFFDAE2FD),
-          ),
-        ),
+        Text(title, style: AppText.h4),
         const SizedBox(height: 6),
-        Text(
-          subtitle,
-          style: const TextStyle(
-              fontSize: 14, color: Color(0xFFCBC3D7)),
-        ),
+        Text(subtitle, style: AppText.bodySmall),
       ],
     ),
   );
@@ -922,15 +795,13 @@ class _ActionBtn extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onTap,
-    this.isDanger    = false,
-    this.isGradient  = false,
+    this.isDanger   = false,
+    this.isGradient = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isDanger
-        ? const Color(0xFFFFB4AB)
-        : const Color(0xFFD0BCFF);
+    final color = isDanger ? AppColors.error : AppColors.accent;
 
     if (isGradient) {
       return GestureDetector(
@@ -939,28 +810,26 @@ class _ActionBtn extends StatelessWidget {
           height: 42,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-            ),
-            boxShadow: const [
+            gradient: AppColors.gradientPrimary,
+            boxShadow: [
               BoxShadow(
-                color: Color(0x33A078FF),
+                color: AppColors.accentDeep.withValues(alpha: 0.35),
                 blurRadius: 12,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: const Color(0xFF3C0091)),
+              Icon(icon, size: 16, color: Colors.white),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF3C0091),
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -976,7 +845,7 @@ class _ActionBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.25)),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -998,23 +867,7 @@ class _ActionBtn extends StatelessWidget {
   }
 }
 
-// ── Dialog helpers ────────────────────────────────────────────────────────────
-
-class _DialogLabel extends StatelessWidget {
-  final String text;
-  const _DialogLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFFCBC3D7),
-          letterSpacing: 0.3,
-        ),
-      );
-}
+// ── Dialog input ──────────────────────────────────────────────────────────────
 
 class _DialogInput extends StatelessWidget {
   final TextEditingController controller;
@@ -1025,7 +878,7 @@ class _DialogInput extends StatelessWidget {
   const _DialogInput({
     required this.controller,
     required this.hintText,
-    this.maxLines    = 1,
+    this.maxLines     = 1,
     this.keyboardType = TextInputType.text,
   });
 
@@ -1035,31 +888,28 @@ class _DialogInput extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      style: const TextStyle(fontSize: 14, color: Color(0xFFDAE2FD)),
+      style: AppText.body,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
           fontSize: 14,
-          color: const Color(0xFFCBC3D7).withValues(alpha: 0.30),
+          color: AppColors.textMuted.withValues(alpha: 0.40),
         ),
         filled: true,
-        fillColor: const Color(0xFF0D1528),
+        fillColor: Colors.white.withValues(alpha: 0.04),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.50)),
+          borderSide: const BorderSide(color: AppColors.accentDeep, width: 1.5),
         ),
       ),
     );

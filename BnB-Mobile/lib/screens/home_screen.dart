@@ -5,6 +5,7 @@ import 'package:b_and_b/models/worker_service.dart';
 import 'package:b_and_b/repositories/property_repository.dart';
 import 'package:b_and_b/repositories/service_repository.dart';
 import 'package:b_and_b/services/api_service.dart';
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,16 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userRole;
   String  _userName = '';
 
-  final _pageController = PageController(viewportFraction: 0.88);
+  final _pageController = PageController(viewportFraction: 0.86);
   Timer? _autoScrollTimer;
-  int    _currentPage = 0;
-  int    _navIndex    = 0;
-
-  // ── Design tokens ────────────────────────────────────────────────
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
+  int _currentPage = 0;
+  int _navIndex    = 0;
 
   @override
   void initState() {
@@ -49,13 +44,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _startAutoScroll(int count) {
     if (count <= 1) return;
     _autoScrollTimer?.cancel();
-    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted) return;
       _currentPage = (_currentPage + 1) % count;
       _pageController.animateToPage(
         _currentPage,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
       );
     });
   }
@@ -83,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
-            backgroundColor: const Color(0xFF93000A),
+            backgroundColor: AppColors.errorBg,
           ),
         );
       }
@@ -93,36 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Background glows ──────────────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Main content ─────────────────────────────────────────
           Column(
             children: [
               _TopBar(
@@ -131,11 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Expanded(
                 child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(color: _primary))
+                    ? _buildSkeleton()
                     : RefreshIndicator(
-                        color: _primary,
-                        backgroundColor: const Color(0xFF171F33),
+                        color: AppColors.accent,
+                        backgroundColor: AppColors.surfaceHigh,
                         onRefresh: _loadData,
                         child: _userRole == 'worker'
                             ? _buildWorkerView()
@@ -145,96 +116,44 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
 
-          // ── Gradient FAB ─────────────────────────────────────────
+          // FAB
           Positioned(
             right: 20,
-            bottom: 96,
+            bottom: 100,
             child: GestureDetector(
               onTap: () => context.push('/properties/add'),
               child: Container(
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFA078FF), Color(0xFF6D3BD7)],
-                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: AppColors.gradientPrimary,
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0x806D3BD7),
+                      color: Color(0x607C5CFC),
                       blurRadius: 24,
                       offset: Offset(0, 8),
                     ),
                   ],
                 ),
-                child: const Icon(Icons.add, color: Colors.white, size: 26),
+                child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
               ),
             ),
           ),
 
-          // ── Bottom nav bar ────────────────────────────────────────
+          // Bottom nav
           Positioned(
             bottom: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.92,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF171F33).withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.15)),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x4D000000),
-                      blurRadius: 40,
-                      offset: Offset(0, 16),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_rounded,
-                      label: 'Home',
-                      active: _navIndex == 0,
-                      onTap: () => setState(() => _navIndex = 0),
-                    ),
-                    _NavItem(
-                      icon: Icons.search_rounded,
-                      label: 'Search',
-                      active: _navIndex == 1,
-                      onTap: () {
-                        setState(() => _navIndex = 1);
-                        context.push('/properties/list');
-                      },
-                    ),
-                    _NavItem(
-                      icon: Icons.assignment_turned_in_outlined,
-                      label: 'Requests',
-                      active: _navIndex == 2,
-                      onTap: () {
-                        setState(() => _navIndex = 2);
-                        context.push('/my-requests');
-                      },
-                    ),
-                    _NavItem(
-                      icon: Icons.person_outline_rounded,
-                      label: 'Profile',
-                      active: _navIndex == 3,
-                      onTap: () {
-                        setState(() => _navIndex = 3);
-                        context.push('/profile');
-                      },
-                    ),
-                  ],
-                ),
-              ),
+            left: 16,
+            right: 16,
+            child: _BottomNav(
+              index: _navIndex,
+              onTap: (i) {
+                setState(() => _navIndex = i);
+                if (i == 1) context.push('/properties/list');
+                if (i == 2) context.push('/my-requests');
+                if (i == 3) context.push('/profile');
+              },
             ),
           ),
         ],
@@ -242,114 +161,98 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ── Worker view ───────────────────────────────────────────────────
-
-  Widget _buildWorkerView() {
+  Widget _buildSkeleton() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
       children: [
-        _HeroHeading(subtitle: 'Manage your listings & services'),
+        _SkeletonBox(height: 32, width: 200, radius: 8),
+        const SizedBox(height: 8),
+        _SkeletonBox(height: 20, width: 140, radius: 6),
         const SizedBox(height: 24),
-        _SectionHeader(
-          title: 'Properties',
-          subtitle: 'Your active listings',
-          actionLabel: 'SEE ALL',
-          onAction: () => context.push('/my-properties'),
-        ),
-        const SizedBox(height: 12),
-        ..._properties.map((p) => _PropertyListTile(property: p)),
-        const SizedBox(height: 24),
-        _SectionHeader(
-          title: 'Services',
-          subtitle: 'Your offered services',
-          actionLabel: 'SEE ALL',
-          onAction: () => context.push('/services'),
-        ),
-        const SizedBox(height: 12),
-        ..._services.map((s) => _ServiceListTile(service: s)),
+        _SkeletonBox(height: 52, radius: 16),
+        const SizedBox(height: 28),
+        _SkeletonBox(height: 20, width: 160, radius: 6),
         const SizedBox(height: 16),
-        GestureDetector(
-          onTap: () => context.push('/worker-dashboard'),
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.white.withValues(alpha: 0.05),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            alignment: Alignment.center,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.dashboard_outlined, color: _primary, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  'Worker Dashboard',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: _primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        _SkeletonBox(height: 300, radius: 24),
+        const SizedBox(height: 28),
+        _SkeletonBox(height: 20, width: 160, radius: 6),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _SkeletonBox(height: 180, radius: 20)),
+            const SizedBox(width: 12),
+            Expanded(child: _SkeletonBox(height: 180, radius: 20)),
+          ],
         ),
       ],
     );
   }
 
-  // ── User view ─────────────────────────────────────────────────────
+  Widget _buildWorkerView() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+      children: [
+        _HeroHeading(
+          name: _userName,
+          subtitle: 'Manage your listings & services',
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(
+          title: 'My Properties',
+          subtitle: 'Active listings',
+          actionLabel: 'SEE ALL',
+          onAction: () => context.push('/my-properties'),
+        ),
+        const SizedBox(height: 12),
+        if (_properties.isEmpty)
+          _EmptyInline(icon: Icons.home_work_outlined, label: 'No properties yet')
+        else
+          ..._properties.take(3).map((p) => _PropertyListTile(property: p)),
+        const SizedBox(height: 24),
+        _SectionHeader(
+          title: 'My Services',
+          subtitle: 'Offered services',
+          actionLabel: 'SEE ALL',
+          onAction: () => context.push('/services'),
+        ),
+        const SizedBox(height: 12),
+        if (_services.isEmpty)
+          _EmptyInline(icon: Icons.handyman_outlined, label: 'No services yet')
+        else
+          ..._services.take(3).map((s) => _ServiceListTile(service: s)),
+        const SizedBox(height: 20),
+        _DashboardButton(
+          icon: Icons.dashboard_rounded,
+          label: 'Open Worker Dashboard',
+          onTap: () => context.push('/worker-dashboard'),
+        ),
+      ],
+    );
+  }
 
   Widget _buildUserView() {
     final featured = _properties.take(5).toList();
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
       children: [
-        // Hero + search
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _HeroHeading(subtitle: null),
+              _HeroHeading(name: _userName, subtitle: null),
               const SizedBox(height: 20),
-              // Glass search bar
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.10)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search_rounded,
-                        color: _primary.withValues(alpha: 0.8), size: 20),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Search by destination or service',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _onSurfaceVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _SearchBar(onTap: () => context.push('/properties/list')),
             ],
           ),
         ),
         const SizedBox(height: 32),
 
-        // Featured Properties
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: _SectionHeader(
             title: 'Featured Properties',
-            subtitle: 'Curated luxury listings',
+            subtitle: 'Curated premium listings',
             actionLabel: 'VIEW ALL',
             onAction: () => context.push('/properties/list'),
           ),
@@ -358,33 +261,31 @@ class _HomeScreenState extends State<HomeScreen> {
         if (featured.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text('No properties yet.',
-                  style: TextStyle(color: _onSurfaceVariant)),
+            child: _EmptyInline(
+              icon: Icons.home_work_outlined,
+              label: 'No properties yet',
             ),
           )
         else
           SizedBox(
-            height: 320,
+            height: 310,
             child: PageView.builder(
               controller: _pageController,
               itemCount: featured.length,
               itemBuilder: (_, i) => Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: _FeaturedPropertyCard(property: featured[i]),
+                padding: const EdgeInsets.only(right: 14),
+                child: _FeaturedCard(property: featured[i]),
               ),
             ),
           ),
 
         const SizedBox(height: 32),
-
-        // Available Services
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: _SectionHeader(
             title: 'Available Services',
-            subtitle: 'Bespoke assistance at your door',
-            actionLabel: 'EXPLORE ALL',
+            subtitle: 'Expert help at your door',
+            actionLabel: 'EXPLORE',
             onAction: () => context.push('/services'),
           ),
         ),
@@ -392,21 +293,22 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_services.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: Text('No services yet.',
-                  style: TextStyle(color: _onSurfaceVariant)),
+            child: _EmptyInline(
+              icon: Icons.handyman_outlined,
+              label: 'No services yet',
             ),
           )
         else
           SizedBox(
-            height: 200,
+            height: 190,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 24),
               itemCount: _services.length,
-              itemBuilder: (_, i) => _ServiceCard(service: _services[i]),
+              itemBuilder: (_, i) => _ServiceMiniCard(service: _services[i]),
             ),
           ),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -419,55 +321,52 @@ class _TopBar extends StatelessWidget {
   final VoidCallback onProfileTap;
   const _TopBar({required this.userName, required this.onProfileTap});
 
-  static const Color _primary = Color(0xFFD0BCFF);
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0B1326).withValues(alpha: 0.10),
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 1,
-            ),
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
         child: Row(
           children: [
-            const Text(
-              'B&B',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: _primary,
-                letterSpacing: -0.5,
+            ShaderMask(
+              shaderCallback: (r) => const LinearGradient(
+                colors: [Color(0xFFB69EFF), Color(0xFF4FC3F7)],
+              ).createShader(r),
+              child: const Text(
+                'B&B',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -1.0,
+                ),
               ),
             ),
             const Spacer(),
             GestureDetector(
               onTap: onProfileTap,
               child: Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                  ),
-                  border: Border.all(
-                      color: _primary.withValues(alpha: 0.3), width: 1.5),
+                  gradient: AppColors.gradientPrimary,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentDeep.withValues(alpha: 0.4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
                     userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF3C0091),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -483,8 +382,9 @@ class _TopBar extends StatelessWidget {
 // ── Hero heading ──────────────────────────────────────────────────────────────
 
 class _HeroHeading extends StatelessWidget {
+  final String name;
   final String? subtitle;
-  const _HeroHeading({this.subtitle});
+  const _HeroHeading({required this.name, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -492,20 +392,26 @@ class _HeroHeading extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         RichText(
-          text: const TextSpan(
-            style: TextStyle(
-              fontSize: 34,
+          text: TextSpan(
+            style: const TextStyle(
+              fontSize: 30,
               fontWeight: FontWeight.w800,
-              color: Color(0xFFDAE2FD),
+              color: AppColors.textPrimary,
               letterSpacing: -0.8,
-              height: 1.15,
+              height: 1.2,
             ),
             children: [
-              TextSpan(text: 'Find Your\n'),
-              TextSpan(
+              if (name.isNotEmpty)
+                TextSpan(
+                  text: 'Hello, ${name.split(' ').first}\n',
+                ),
+              const TextSpan(
+                text: 'Find Your ',
+              ),
+              const TextSpan(
                 text: 'Sanctuary',
                 style: TextStyle(
-                  color: Color(0xFFD0BCFF),
+                  color: AppColors.accent,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -514,16 +420,69 @@ class _HeroHeading extends StatelessWidget {
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 6),
-          Text(
-            subtitle!,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFFCBC3D7),
-              height: 1.5,
-            ),
-          ),
+          Text(subtitle!, style: AppText.bodySmall),
         ],
       ],
+    );
+  }
+}
+
+// ── Search bar ────────────────────────────────────────────────────────────────
+
+class _SearchBar extends StatelessWidget {
+  final VoidCallback onTap;
+  const _SearchBar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search_rounded,
+                color: AppColors.accent, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              'Search properties, services…',
+              style: AppText.bodySmall.copyWith(
+                color: AppColors.textMuted.withValues(alpha: 0.7),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.accentSoft,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.accentGlow),
+              ),
+              child: const Text(
+                'AI',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.accent,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -552,23 +511,9 @@ class _SectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFDAE2FD),
-                  letterSpacing: -0.3,
-                ),
-              ),
+              Text(title, style: AppText.h4),
               const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: const Color(0xFFCBC3D7).withValues(alpha: 0.7),
-                ),
-              ),
+              Text(subtitle, style: AppText.bodySmall),
             ],
           ),
         ),
@@ -578,8 +523,8 @@ class _SectionHeader extends StatelessWidget {
             actionLabel,
             style: const TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFD0BCFF),
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
               letterSpacing: 1.5,
             ),
           ),
@@ -591,79 +536,81 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Featured property card ────────────────────────────────────────────────────
 
-class _FeaturedPropertyCard extends StatelessWidget {
+class _FeaturedCard extends StatelessWidget {
   final Property property;
-  const _FeaturedPropertyCard({required this.property});
+  const _FeaturedCard({required this.property});
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Image or gradient placeholder
           property.images.isNotEmpty
               ? Image.network(
                   property.images.first.fullUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                  errorBuilder: (_, __, ___) => _placeholder(),
                 )
-              : _imagePlaceholder(),
+              : _placeholder(),
 
-          // Bottom gradient overlay
+          // Gradient overlay
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Color(0xCC0B1326)],
-                  stops: [0.4, 1.0],
+                  colors: [Colors.transparent, Color(0xEE060B18)],
+                  stops: [0.35, 1.0],
                 ),
               ),
             ),
           ),
 
-          // Info overlay
+          // Content overlay
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tags
                   Row(
                     children: [
                       if (property.city.isNotEmpty)
                         _Tag(label: property.city, isPrimary: true),
                       const SizedBox(width: 6),
                       _Tag(label: '${property.rooms} Rooms'),
-                      const SizedBox(width: 6),
-                      if (property.areaMq > 0)
+                      if (property.areaMq > 0) ...[
+                        const SizedBox(width: 6),
                         _Tag(label: '${property.areaMq.toStringAsFixed(0)}m²'),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Text(
                     property.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFDAE2FD),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
                       height: 1.2,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     '\$${property.price.toStringAsFixed(0)}',
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFD0BCFF),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.accent,
                     ),
                   ),
                 ],
@@ -675,21 +622,15 @@ class _FeaturedPropertyCard extends StatelessWidget {
     );
   }
 
-  Widget _imagePlaceholder() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1040), Color(0xFF0B1326)],
+  Widget _placeholder() => Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.gradientCard,
         ),
-      ),
-      child: const Center(
-        child: Icon(Icons.home_work_outlined,
-            color: Color(0x33D0BCFF), size: 64),
-      ),
-    );
-  }
+        child: const Center(
+          child: Icon(Icons.home_work_outlined,
+              color: Color(0x33B69EFF), size: 64),
+        ),
+      );
 }
 
 class _Tag extends StatelessWidget {
@@ -703,19 +644,21 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: isPrimary
-            ? const Color(0xFFD0BCFF).withValues(alpha: 0.15)
-            : Colors.white.withValues(alpha: 0.10),
+            ? AppColors.accentSoft
+            : Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: isPrimary
+              ? AppColors.accentGlow
+              : Colors.white.withValues(alpha: 0.12),
+        ),
       ),
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
           fontSize: 9,
-          fontWeight: FontWeight.w600,
-          color: isPrimary
-              ? const Color(0xFFD0BCFF)
-              : const Color(0xFFDAE2FD),
+          fontWeight: FontWeight.w700,
+          color: isPrimary ? AppColors.accent : AppColors.textSecondary,
           letterSpacing: 0.8,
         ),
       ),
@@ -723,96 +666,81 @@ class _Tag extends StatelessWidget {
   }
 }
 
-// ── Service card (horizontal scroll) ─────────────────────────────────────────
+// ── Service mini card (horizontal scroll) ─────────────────────────────────────
 
-class _ServiceCard extends StatelessWidget {
+class _ServiceMiniCard extends StatelessWidget {
   final WorkerService service;
-  const _ServiceCard({required this.service});
+  const _ServiceMiniCard({required this.service});
+
+  static const _icons = {
+    'plumbing':   Icons.plumbing,
+    'painting':   Icons.format_paint,
+    'tiling':     Icons.grid_on,
+    'electrical': Icons.electrical_services,
+    'carpentry':  Icons.carpenter,
+    'finishing':  Icons.home_repair_service,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final icon = _icons[service.type.toLowerCase()] ?? Icons.handyman_outlined;
     return Container(
-      width: 200,
+      width: 160,
       margin: const EdgeInsets.only(right: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFFA078FF), Color(0xFF6D3BD7)],
-              ),
-              boxShadow: const [
+              borderRadius: BorderRadius.circular(14),
+              gradient: AppColors.gradientPrimary,
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x66A078FF),
-                  blurRadius: 16,
-                  offset: Offset(0, 4),
+                  color: AppColors.accentDeep.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: const Icon(Icons.handyman_outlined,
-                color: Colors.white, size: 20),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(height: 12),
           Text(
-            service.type.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFDAE2FD),
-            ),
+            service.type,
+            style: AppText.h4.copyWith(fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             service.description,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              color: const Color(0xFFCBC3D7).withValues(alpha: 0.7),
-            ),
+            style: AppText.bodySmall.copyWith(fontSize: 11),
           ),
           const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '\$${service.pricePerUnit}/${service.unit}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFD0BCFF),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  color: Colors.white.withValues(alpha: 0.06),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.10)),
-                ),
-                child: const Text(
-                  'Request',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFFDAE2FD),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            '\$${service.pricePerUnit}/${service.unit}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+            ),
           ),
         ],
       ),
@@ -820,7 +748,7 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
-// ── Property list tile (worker view) ─────────────────────────────────────────
+// ── Worker list tiles ─────────────────────────────────────────────────────────
 
 class _PropertyListTile extends StatelessWidget {
   final Property property;
@@ -839,15 +767,19 @@ class _PropertyListTile extends StatelessWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
               width: 56,
               height: 56,
-              color: const Color(0xFF1A1040),
               child: property.images.isNotEmpty
-                  ? Image.network(property.images.first.fullUrl, fit: BoxFit.cover)
-                  : const Icon(Icons.home_outlined,
-                      color: Color(0x66D0BCFF), size: 28),
+                  ? Image.network(property.images.first.fullUrl,
+                      fit: BoxFit.cover)
+                  : Container(
+                      decoration: const BoxDecoration(
+                          gradient: AppColors.gradientCard),
+                      child: const Icon(Icons.home_outlined,
+                          color: Color(0x55B69EFF), size: 26),
+                    ),
             ),
           ),
           const SizedBox(width: 12),
@@ -855,22 +787,13 @@ class _PropertyListTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  property.title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFDAE2FD),
-                  ),
-                ),
+                Text(property.title,
+                    style: AppText.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        fontSize: 14)),
                 if (property.city.isNotEmpty)
-                  Text(
-                    property.city,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFFCBC3D7).withValues(alpha: 0.6),
-                    ),
-                  ),
+                  Text(property.city, style: AppText.bodySmall),
               ],
             ),
           ),
@@ -879,7 +802,7 @@ class _PropertyListTile extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: Color(0xFFD0BCFF),
+              color: AppColors.accent,
             ),
           ),
         ],
@@ -887,8 +810,6 @@ class _PropertyListTile extends StatelessWidget {
     );
   }
 }
-
-// ── Service list tile (worker view) ──────────────────────────────────────────
 
 class _ServiceListTile extends StatelessWidget {
   final WorkerService service;
@@ -910,34 +831,25 @@ class _ServiceListTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFFA078FF), Color(0xFF6D3BD7)],
-              ),
+              borderRadius: BorderRadius.circular(12),
+              gradient: AppColors.gradientPrimary,
             ),
             child: const Icon(Icons.handyman_outlined,
-                color: Colors.white, size: 18),
+                color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  service.type.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFDAE2FD),
-                  ),
-                ),
-                Text(
-                  '\$${service.pricePerUnit}/${service.unit}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFD0BCFF),
-                  ),
-                ),
+                Text(service.type,
+                    style: AppText.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        fontSize: 14)),
+                Text('\$${service.pricePerUnit}/${service.unit}',
+                    style: AppText.bodySmall.copyWith(
+                        color: AppColors.accent, fontSize: 12)),
               ],
             ),
           ),
@@ -947,8 +859,8 @@ class _ServiceListTile extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: service.isAvailable
-                  ? const Color(0xFF4CAF50)
-                  : const Color(0xFF958EA0),
+                  ? AppColors.success
+                  : AppColors.textMuted,
             ),
           ),
         ],
@@ -957,14 +869,95 @@ class _ServiceListTile extends StatelessWidget {
   }
 }
 
-// ── Bottom nav item ───────────────────────────────────────────────────────────
+class _DashboardButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _DashboardButton(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: AppColors.gradientPrimary,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x507C5CFC),
+              blurRadius: 20,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Bottom nav ────────────────────────────────────────────────────────────────
+
+class _BottomNav extends StatelessWidget {
+  final int index;
+  final void Function(int) onTap;
+  const _BottomNav({required this.index, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavItem(icon: Icons.home_rounded, label: 'Home',
+              active: index == 0, onTap: () => onTap(0)),
+          _NavItem(icon: Icons.search_rounded, label: 'Search',
+              active: index == 1, onTap: () => onTap(1)),
+          _NavItem(icon: Icons.receipt_long_outlined, label: 'Requests',
+              active: index == 2, onTap: () => onTap(2)),
+          _NavItem(icon: Icons.person_outline_rounded, label: 'Profile',
+              active: index == 3, onTap: () => onTap(3)),
+        ],
+      ),
+    );
+  }
+}
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
   final VoidCallback onTap;
-
   const _NavItem({
     required this.icon,
     required this.label,
@@ -977,41 +970,83 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 220),
         padding: EdgeInsets.symmetric(
-          horizontal: active ? 18 : 14,
-          vertical: 8,
-        ),
+            horizontal: active ? 20 : 16, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          gradient: active
-              ? const LinearGradient(
-                  colors: [Color(0xFFD0BCFF), Color(0xFFD0BCFF)],
-                )
+          gradient: active ? AppColors.gradientPrimary : null,
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: AppColors.accentDeep.withValues(alpha: 0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : null,
         ),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: active ? const Color(0xFF3C0091) : const Color(0xFFCBC3D7),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: active
-                    ? const Color(0xFF3C0091)
-                    : const Color(0xFFCBC3D7),
-                letterSpacing: 0.3,
+            Icon(icon,
+                size: 20,
+                color: active ? Colors.white : AppColors.textMuted),
+            if (active) ...[
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
-            ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Skeleton & empty helpers ──────────────────────────────────────────────────
+
+class _SkeletonBox extends StatelessWidget {
+  final double height;
+  final double? width;
+  final double radius;
+  const _SkeletonBox(
+      {required this.height, this.width, this.radius = 12});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+}
+
+class _EmptyInline extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _EmptyInline({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppColors.textMuted),
+          const SizedBox(width: 8),
+          Text(label, style: AppText.bodySmall),
+        ],
       ),
     );
   }

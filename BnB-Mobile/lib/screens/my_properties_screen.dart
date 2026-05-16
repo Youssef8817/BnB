@@ -1,6 +1,7 @@
 import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/repositories/property_repository.dart';
 import 'package:b_and_b/services/api_service.dart';
+import 'package:b_and_b/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,11 +17,6 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
   final _repo = PropertyRepository();
   List<Property> _properties = [];
   bool _isLoading = true;
-
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   @override
   void initState() {
@@ -66,103 +62,49 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
     }
   }
 
-  void _showSuccess(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: const Color(0xFF1A1040),
-    ));
-  }
+  void _showSuccess(String msg) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppColors.surface),
+      );
 
-  void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: const Color(0xFF93000A),
-    ));
-  }
+  void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppColors.errorBg),
+      );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Purple glow — top-right ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          // ── Blue glow — bottom-left ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Content ───────────────────────────────────────────────
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.06),
-                            border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12)),
-                          ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded,
-                              color: _primary, size: 16),
+                      BackButton2(
+                          onTap: () => Navigator.of(context).pop()),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('My Properties', style: AppText.h3),
+                            Text(
+                              '${_properties.length} listing${_properties.length == 1 ? '' : 's'}',
+                              style: AppText.bodySmall,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'My Properties',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: _onSurface,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          Text(
-                            '${_properties.length} listing${_properties.length == 1 ? '' : 's'}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _onSurfaceVariant.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      // Add button
                       GestureDetector(
                         onTap: () async {
                           final result =
@@ -172,40 +114,40 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                            ),
+                            gradient: AppColors.gradientPrimary,
                             boxShadow: [
                               BoxShadow(
-                                color: Color(0x44A078FF),
+                                color: AppColors.accentDeep
+                                    .withValues(alpha: 0.40),
                                 blurRadius: 16,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: const Icon(Icons.add_rounded,
-                              color: Color(0xFF3C0091), size: 22),
+                              color: Colors.white, size: 22),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // List
                 Expanded(
                   child: _isLoading
                       ? const Center(
-                          child: CircularProgressIndicator(color: _primary))
+                          child: CircularProgressIndicator(
+                              color: AppColors.accent))
                       : _properties.isEmpty
                           ? _buildEmpty()
                           : RefreshIndicator(
-                              color: _primary,
-                              backgroundColor: const Color(0xFF171F33),
+                              color: AppColors.accent,
+                              backgroundColor: AppColors.surface,
                               onRefresh: _load,
                               child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                                padding: const EdgeInsets.fromLTRB(
+                                    20, 8, 20, 32),
                                 itemCount: _properties.length,
                                 itemBuilder: (_, i) => _PropertyCard(
                                   property: _properties[i],
@@ -242,26 +184,17 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.05),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              color: AppColors.accentSoft,
+              border: Border.all(color: AppColors.border),
             ),
             child: const Icon(Icons.home_work_outlined,
-                color: _primary, size: 36),
+                color: AppColors.accent, size: 36),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No Properties Yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _onSurface,
-            ),
-          ),
+          Text('No Properties Yet', style: AppText.h4),
           const SizedBox(height: 6),
-          const Text(
-            'Add your first listing to get started.',
-            style: TextStyle(fontSize: 14, color: _onSurfaceVariant),
-          ),
+          Text('Add your first listing to get started.',
+              style: AppText.bodySmall),
         ],
       ),
     );
@@ -281,10 +214,9 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
   }
 
   Future<void> _showStatusDialog(Property p) async {
-    String selected = p.status;
     final newStatus = await showDialog<String>(
       context: context,
-      builder: (_) => _StatusDialog(current: selected),
+      builder: (_) => _StatusDialog(current: p.status),
     );
     if (newStatus != null && newStatus != p.status) {
       await _updateStatus(p.id, newStatus);
@@ -307,19 +239,6 @@ class _PropertyCard extends StatelessWidget {
     required this.onChangeStatus,
   });
 
-  Color _statusColor(String s) {
-    switch (s.toLowerCase()) {
-      case 'available':
-        return const Color(0xFF4CAF50);
-      case 'pending':
-        return const Color(0xFFFFB74D);
-      case 'sold':
-        return const Color(0xFF958EA0);
-      default:
-        return const Color(0xFF958EA0);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final hasImage = property.images.isNotEmpty;
@@ -331,9 +250,9 @@ class _PropertyCard extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 28,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -350,6 +269,7 @@ class _PropertyCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: property.images.first.fullUrl,
                       fit: BoxFit.cover,
+                      width: double.infinity,
                       placeholder: (_, __) => _imgPlaceholder(),
                       errorWidget: (_, __, ___) => _imgPlaceholder(),
                     )
@@ -357,7 +277,6 @@ class _PropertyCard extends StatelessWidget {
             ),
           ),
 
-          // Info
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -367,39 +286,11 @@ class _PropertyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        property.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFDAE2FD),
-                          height: 1.3,
-                        ),
-                      ),
+                      child: Text(property.title,
+                          style: AppText.h4.copyWith(fontSize: 16)),
                     ),
                     const SizedBox(width: 8),
-                    // Status badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _statusColor(property.status)
-                            .withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                            color: _statusColor(property.status)
-                                .withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        property.status.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: _statusColor(property.status),
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ),
+                    StatusBadge(status: property.status),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -408,19 +299,12 @@ class _PropertyCard extends StatelessWidget {
                     children: [
                       Icon(Icons.location_on_outlined,
                           size: 13,
-                          color: const Color(0xFFCBC3D7).withValues(alpha: 0.6)),
+                          color: AppColors.textMuted.withValues(alpha: 0.6)),
                       const SizedBox(width: 3),
-                      Text(
-                        property.city,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: const Color(0xFFCBC3D7).withValues(alpha: 0.7),
-                        ),
-                      ),
+                      Text(property.city, style: AppText.bodySmall),
                     ],
                   ),
                 const SizedBox(height: 10),
-                // Stats row
                 Row(
                   children: [
                     _Stat(
@@ -432,18 +316,11 @@ class _PropertyCard extends StatelessWidget {
                         label:
                             '${property.areaMq.toStringAsFixed(0)}m²'),
                     const Spacer(),
-                    Text(
-                      property.formattedPrice,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFD0BCFF),
-                      ),
-                    ),
+                    Text(property.formattedPrice,
+                        style: AppText.price.copyWith(fontSize: 16)),
                   ],
                 ),
                 const SizedBox(height: 14),
-                // Actions
                 Row(
                   children: [
                     Expanded(
@@ -478,21 +355,13 @@ class _PropertyCard extends StatelessWidget {
     );
   }
 
-  Widget _imgPlaceholder() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1040), Color(0xFF0B1326)],
+  Widget _imgPlaceholder() => Container(
+        decoration: const BoxDecoration(gradient: AppColors.gradientCard),
+        child: Center(
+          child: Icon(Icons.home_work_outlined,
+              color: AppColors.accent.withValues(alpha: 0.20), size: 48),
         ),
-      ),
-      child: const Center(
-        child: Icon(Icons.home_work_outlined,
-            color: Color(0x33D0BCFF), size: 48),
-      ),
-    );
-  }
+      );
 }
 
 class _Stat extends StatelessWidget {
@@ -504,17 +373,10 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon,
-            size: 14,
-            color: const Color(0xFFCBC3D7).withValues(alpha: 0.5)),
+        Icon(icon, size: 13,
+            color: AppColors.textMuted.withValues(alpha: 0.5)),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: const Color(0xFFCBC3D7).withValues(alpha: 0.7),
-          ),
-        ),
+        Text(label, style: AppText.bodySmall.copyWith(fontSize: 12)),
       ],
     );
   }
@@ -535,7 +397,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDanger ? const Color(0xFFFFB4AB) : const Color(0xFFD0BCFF);
+    final color = isDanger ? AppColors.error : AppColors.accent;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -583,46 +445,30 @@ class _StyledDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF111827),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: AppColors.surface,
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFDAE2FD),
-              ),
-            ),
+            Text(title, style: AppText.h4),
             const SizedBox(height: 12),
-            Text(
-              body,
-              style: const TextStyle(
-                  fontSize: 14, color: Color(0xFFCBC3D7), height: 1.5),
-            ),
+            Text(body, style: AppText.body),
             const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(false),
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.10)),
-                      ),
-                      alignment: Alignment.center,
+                    child: GlassBox(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       child: const Text('Cancel',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Color(0xFFCBC3D7),
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600)),
                     ),
                   ),
@@ -632,25 +478,25 @@ class _StyledDialog extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(true),
                     child: Container(
-                      height: 44,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: confirmDanger
-                            ? const Color(0xFF93000A).withValues(alpha: 0.25)
-                            : const Color(0xFFA078FF).withValues(alpha: 0.20),
+                            ? AppColors.error.withValues(alpha: 0.15)
+                            : AppColors.accentSoft,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: confirmDanger
-                              ? const Color(0xFFFFB4AB).withValues(alpha: 0.4)
-                              : const Color(0xFFD0BCFF).withValues(alpha: 0.4),
+                              ? AppColors.error.withValues(alpha: 0.40)
+                              : AppColors.accent.withValues(alpha: 0.40),
                         ),
                       ),
-                      alignment: Alignment.center,
                       child: Text(
                         confirmLabel,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: confirmDanger
-                              ? const Color(0xFFFFB4AB)
-                              : const Color(0xFFD0BCFF),
+                              ? AppColors.error
+                              : AppColors.accent,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -688,38 +534,33 @@ class _StatusDialogState extends State<_StatusDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF111827),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: AppColors.surface,
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Change Status',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFDAE2FD),
-              ),
-            ),
+            Text('Change Status', style: AppText.h4),
             const SizedBox(height: 16),
             for (final s in ['available', 'pending', 'sold'])
               GestureDetector(
                 onTap: () => setState(() => _selected = s),
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: _selected == s
-                        ? const Color(0xFFD0BCFF).withValues(alpha: 0.10)
+                        ? AppColors.accentSoft
                         : Colors.white.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selected == s
-                          ? const Color(0xFFD0BCFF).withValues(alpha: 0.40)
+                          ? AppColors.accent.withValues(alpha: 0.40)
                           : Colors.white.withValues(alpha: 0.08),
                     ),
                   ),
@@ -731,8 +572,8 @@ class _StatusDialogState extends State<_StatusDialog> {
                             : Icons.radio_button_off_rounded,
                         size: 18,
                         color: _selected == s
-                            ? const Color(0xFFD0BCFF)
-                            : const Color(0xFFCBC3D7),
+                            ? AppColors.accent
+                            : AppColors.textMuted,
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -741,8 +582,8 @@ class _StatusDialogState extends State<_StatusDialog> {
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: _selected == s
-                              ? const Color(0xFFDAE2FD)
-                              : const Color(0xFFCBC3D7),
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -755,18 +596,12 @@ class _StatusDialogState extends State<_StatusDialog> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.10)),
-                      ),
-                      alignment: Alignment.center,
+                    child: GlassBox(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       child: const Text('Cancel',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Color(0xFFCBC3D7),
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600)),
                     ),
                   ),
@@ -776,18 +611,16 @@ class _StatusDialogState extends State<_StatusDialog> {
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(_selected),
                     child: Container(
-                      height: 44,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                        ),
+                        gradient: AppColors.gradientPrimary,
                       ),
-                      alignment: Alignment.center,
                       child: const Text(
                         'Confirm',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF3C0091),
+                          color: Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

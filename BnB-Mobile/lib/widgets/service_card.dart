@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:b_and_b/models/worker_service.dart';
 import 'package:b_and_b/services/api_service.dart';
+import 'package:b_and_b/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 
 class ServiceCard extends StatelessWidget {
   final WorkerService service;
@@ -36,10 +37,8 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = _typeIcons[service.type.toLowerCase()] ?? Icons.build_rounded;
-    final availColor = service.isAvailable
-        ? const Color(0xFF4CAF50)
-        : const Color(0xFF958EA0);
+    final icon       = _typeIcons[service.type.toLowerCase()] ?? Icons.build_rounded;
+    final availColor = service.isAvailable ? AppColors.success : AppColors.textMuted;
 
     return GestureDetector(
       onTap: () => _showRequestSheet(context),
@@ -52,7 +51,7 @@ class ServiceCard extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
+              color: Colors.black.withValues(alpha: 0.20),
               blurRadius: 24,
               offset: const Offset(0, 6),
             ),
@@ -65,47 +64,38 @@ class ServiceCard extends StatelessWidget {
             Container(
               width: 52,
               height: 52,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFFA078FF), Color(0xFF6D3BD7)],
+                  colors: [AppColors.accent, AppColors.accentDeep],
                 ),
               ),
               child: Icon(icon, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 14),
 
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Type + availability badge
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
                           service.type.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFDAE2FD),
-                            letterSpacing: 0.3,
-                          ),
+                          style: AppText.h4.copyWith(fontSize: 15, letterSpacing: 0.3),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 9, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                         decoration: BoxDecoration(
                           color: availColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                              color: availColor.withValues(alpha: 0.35)),
+                          border: Border.all(color: availColor.withValues(alpha: 0.35)),
                         ),
                         child: Text(
                           service.isAvailable ? 'AVAILABLE' : 'UNAVAILABLE',
@@ -120,65 +110,45 @@ class ServiceCard extends StatelessWidget {
                     ],
                   ),
 
-                  // Worker name
                   if (service.worker?.name.isNotEmpty == true) ...[
                     const SizedBox(height: 3),
                     Row(
                       children: [
                         Icon(Icons.person_outline_rounded,
-                            size: 12,
-                            color: const Color(0xFFCBC3D7)
-                                .withValues(alpha: 0.5)),
+                            size: 12, color: AppColors.textMuted.withValues(alpha: 0.5)),
                         const SizedBox(width: 4),
                         Text(
                           service.worker!.name,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: const Color(0xFFCBC3D7)
-                                .withValues(alpha: 0.7),
-                          ),
+                          style: AppText.bodySmall.copyWith(fontSize: 12),
                         ),
                       ],
                     ),
                   ],
 
-                  // Description
                   if (service.description.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
                       service.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppText.bodySmall.copyWith(
                         fontSize: 12,
-                        height: 1.4,
-                        color: const Color(0xFFCBC3D7)
-                            .withValues(alpha: 0.65),
+                        color: AppColors.textMuted.withValues(alpha: 0.65),
                       ),
                     ),
                   ],
 
                   const SizedBox(height: 12),
 
-                  // Bottom row: price + request button
                   Row(
                     children: [
                       Text(
                         '\$${service.pricePerUnit.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFD0BCFF),
-                          letterSpacing: -0.5,
-                        ),
+                        style: AppText.price.copyWith(fontSize: 20),
                       ),
                       Text(
                         ' / ${service.unit}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: const Color(0xFFCBC3D7)
-                              .withValues(alpha: 0.6),
-                        ),
+                        style: AppText.bodySmall.copyWith(fontSize: 13),
                       ),
                       const Spacer(),
                       if (service.isAvailable)
@@ -187,17 +157,12 @@ class ServiceCard extends StatelessWidget {
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFA078FF),
-                                Color(0xFF00A2E6)
-                              ],
-                            ),
-                            boxShadow: const [
+                            gradient: AppColors.gradientPrimary,
+                            boxShadow: [
                               BoxShadow(
-                                color: Color(0x33A078FF),
+                                color: AppColors.accentDeep.withValues(alpha: 0.35),
                                 blurRadius: 10,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
@@ -206,7 +171,7 @@ class ServiceCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF3C0091),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -247,9 +212,10 @@ class _RequestSheetState extends State<_RequestSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF111827),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -261,7 +227,6 @@ class _RequestSheetState extends State<_RequestSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle
           Center(
             child: Container(
               width: 40,
@@ -276,191 +241,71 @@ class _RequestSheetState extends State<_RequestSheet> {
 
           Text(
             'Request ${widget.serviceType[0].toUpperCase()}${widget.serviceType.substring(1)}',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFDAE2FD),
-              letterSpacing: -0.3,
-            ),
+            style: AppText.h3,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Tell us what you need',
-            style: TextStyle(fontSize: 13, color: Color(0xFFCBC3D7)),
-          ),
+          Text('Tell us what you need', style: AppText.bodySmall),
           const SizedBox(height: 24),
 
-          // Note
-          const _SheetLabel('Note'),
-          const SizedBox(height: 8),
-          _SheetInput(
+          PremiumInputField(
             controller: widget.noteController,
             hintText: 'Describe what you need…',
+            label: 'Note',
+            prefixIcon: Icons.notes_rounded,
             maxLines: 3,
-            icon: Icons.notes_rounded,
           ),
           const SizedBox(height: 14),
 
-          // Address
-          const _SheetLabel('Address'),
-          const SizedBox(height: 8),
-          _SheetInput(
+          PremiumInputField(
             controller: widget.addressController,
             hintText: 'Your service address',
-            maxLines: 1,
-            icon: Icons.location_on_outlined,
+            label: 'Address',
+            prefixIcon: Icons.location_on_outlined,
           ),
           const SizedBox(height: 24),
 
-          // Submit button
-          GestureDetector(
-            onTap: _isSubmitting
-                ? null
-                : () async {
-                    if (widget.addressController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter an address'),
-                          backgroundColor: Color(0xFF93000A),
-                        ),
-                      );
-                      return;
-                    }
-                    setState(() => _isSubmitting = true);
-                    final messenger = ScaffoldMessenger.of(context);
-                    final nav       = Navigator.of(context);
-                    try {
-                      await widget.onSubmit(
-                        widget.noteController.text.trim(),
-                        widget.addressController.text.trim(),
-                      );
-                      if (!mounted) return;
-                      nav.pop();
-                      messenger.showSnackBar(
-                        const SnackBar(
-                          content: Text('Request sent successfully!'),
-                          backgroundColor: Color(0xFF1A1040),
-                        ),
-                      );
-                    } catch (e) {
-                      if (!mounted) return;
-                      setState(() => _isSubmitting = false);
-                      messenger.showSnackBar(SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: const Color(0xFF93000A),
-                      ));
-                    }
-                  },
-            child: AnimatedOpacity(
-              opacity: _isSubmitting ? 0.7 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                height: 54,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
+          GradientButton(
+            label: 'Submit Request',
+            icon: Icons.send_rounded,
+            isLoading: _isSubmitting,
+            height: 54,
+            onTap: () async {
+              if (widget.addressController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter an address'),
+                    backgroundColor: AppColors.errorBg,
                   ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x44A078FF),
-                      blurRadius: 20,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF3C0091)),
-                        ),
-                      )
-                    : const Text(
-                        'Submit Request',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF3C0091),
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-              ),
-            ),
+                );
+                return;
+              }
+              setState(() => _isSubmitting = true);
+              final messenger = ScaffoldMessenger.of(context);
+              final nav       = Navigator.of(context);
+              try {
+                await widget.onSubmit(
+                  widget.noteController.text.trim(),
+                  widget.addressController.text.trim(),
+                );
+                if (!mounted) return;
+                nav.pop();
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Request sent successfully!'),
+                    backgroundColor: AppColors.surface,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                setState(() => _isSubmitting = false);
+                messenger.showSnackBar(SnackBar(
+                  content: Text(e.toString()),
+                  backgroundColor: AppColors.errorBg,
+                ));
+              }
+            },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SheetLabel extends StatelessWidget {
-  final String text;
-  const _SheetLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFFCBC3D7),
-          letterSpacing: 0.3,
-        ),
-      );
-}
-
-class _SheetInput extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final int maxLines;
-  final IconData icon;
-
-  const _SheetInput({
-    required this.controller,
-    required this.hintText,
-    required this.maxLines,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: const TextStyle(fontSize: 15, color: Color(0xFFDAE2FD)),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(
-          fontSize: 15,
-          color: const Color(0xFFCBC3D7).withValues(alpha: 0.30),
-        ),
-        filled: true,
-        fillColor: const Color(0xFF0D1528),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        suffixIcon: Icon(icon,
-            size: 18,
-            color: const Color(0xFFCBC3D7).withValues(alpha: 0.35)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Colors.white.withValues(alpha: 0.10)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.50)),
-        ),
       ),
     );
   }

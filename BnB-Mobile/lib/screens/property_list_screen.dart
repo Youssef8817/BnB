@@ -1,9 +1,10 @@
+import 'package:b_and_b/models/property.dart';
+import 'package:b_and_b/repositories/property_repository.dart';
+import 'package:b_and_b/theme/app_theme.dart';
+import 'package:b_and_b/widgets/filter_chips_row.dart';
+import 'package:b_and_b/widgets/property_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:b_and_b/repositories/property_repository.dart';
-import 'package:b_and_b/models/property.dart';
-import 'package:b_and_b/widgets/property_card.dart';
-import 'package:b_and_b/widgets/filter_chips_row.dart';
 
 class PropertyListScreen extends StatefulWidget {
   const PropertyListScreen({super.key});
@@ -21,11 +22,6 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   bool    _isLoading    = true;
   String? _selectedCity;
   String  _searchQuery  = '';
-
-  static const Color _bg               = Color(0xFF0B1326);
-  static const Color _primary          = Color(0xFFD0BCFF);
-  static const Color _onSurface        = Color(0xFFDAE2FD);
-  static const Color _onSurfaceVariant = Color(0xFFCBC3D7);
 
   @override
   void initState() {
@@ -53,7 +49,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(e.toString()),
-          backgroundColor: const Color(0xFF93000A),
+          backgroundColor: AppColors.errorBg,
         ));
       }
     }
@@ -74,37 +70,13 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Purple glow — top-right ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.95, -0.95),
-                  radius: 0.9,
-                  colors: [Color(0x556D3BD7), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
-          // ── Blue glow — bottom-left ───────────────────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.95, 0.95),
-                  radius: 0.7,
-                  colors: [Color(0x3300A2E6), Color(0x000B1326)],
-                ),
-              ),
-            ),
-          ),
+          const AmbientBackground(),
 
-          // ── Content ───────────────────────────────────────────────
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -114,41 +86,16 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.06),
-                            border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12)),
-                          ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded,
-                              color: _primary, size: 16),
-                        ),
-                      ),
+                      BackButton2(onTap: () => Navigator.of(context).pop()),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Properties',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: _onSurface,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
+                            Text('Properties', style: AppText.h3),
                             Text(
                               '${_filteredProperties.length} listing${_filteredProperties.length == 1 ? '' : 's'}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: _onSurfaceVariant.withValues(alpha: 0.7),
-                              ),
+                              style: AppText.bodySmall,
                             ),
                           ],
                         ),
@@ -159,21 +106,19 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Color(0xFFA078FF), Color(0xFF00A2E6)],
-                            ),
+                            gradient: AppColors.gradientPrimary,
                             boxShadow: [
                               BoxShadow(
-                                color: Color(0x44A078FF),
+                                color: AppColors.accentDeep.withValues(alpha: 0.40),
                                 blurRadius: 16,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: const Icon(Icons.add_rounded,
-                              color: Color(0xFF3C0091), size: 22),
+                              color: Colors.white, size: 22),
                         ),
                       ),
                     ],
@@ -185,17 +130,13 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                 // Search bar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.10)),
-                    ),
+                  child: GlassBox(
+                    radius: 14,
+                    padding: EdgeInsets.zero,
                     child: TextField(
                       controller: _searchController,
                       style: const TextStyle(
-                          fontSize: 14, color: Color(0xFFDAE2FD)),
+                          fontSize: 14, color: AppColors.textPrimary),
                       onChanged: (v) {
                         _searchQuery = v;
                         _applyFilters();
@@ -204,10 +145,11 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                         hintText: 'Search by title, city or location…',
                         hintStyle: TextStyle(
                           fontSize: 14,
-                          color: _onSurfaceVariant.withValues(alpha: 0.40),
+                          color: AppColors.textMuted.withValues(alpha: 0.40),
                         ),
                         prefixIcon: Icon(Icons.search_rounded,
-                            color: _primary.withValues(alpha: 0.7), size: 20),
+                            color: AppColors.accent.withValues(alpha: 0.7),
+                            size: 20),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? GestureDetector(
                                 onTap: () {
@@ -216,7 +158,7 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                                   _applyFilters();
                                 },
                                 child: Icon(Icons.close_rounded,
-                                    color: _onSurfaceVariant
+                                    color: AppColors.textMuted
                                         .withValues(alpha: 0.5),
                                     size: 18),
                               )
@@ -231,40 +173,34 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
 
                 const SizedBox(height: 12),
 
-                // City filter chips
                 FilterChipsRow(
                   options: const [
-                    'All',
-                    'Cairo',
-                    'Giza',
-                    'Alexandria',
-                    'Luxor',
-                    'Aswan',
+                    'All', 'Cairo', 'Giza', 'Alexandria', 'Luxor', 'Aswan',
                   ],
                   selected: _selectedCity ?? 'All',
                   onSelected: (value) {
-                    setState(
-                        () => _selectedCity = value == 'All' ? null : value);
+                    setState(() =>
+                        _selectedCity = value == 'All' ? null : value);
                     _load(city: _selectedCity);
                   },
                 ),
 
                 const SizedBox(height: 12),
 
-                // List
                 Expanded(
                   child: _isLoading
                       ? const Center(
-                          child: CircularProgressIndicator(color: _primary))
+                          child: CircularProgressIndicator(
+                              color: AppColors.accent))
                       : _filteredProperties.isEmpty
                           ? _buildEmpty()
                           : RefreshIndicator(
-                              color: _primary,
-                              backgroundColor: const Color(0xFF171F33),
+                              color: AppColors.accent,
+                              backgroundColor: AppColors.surface,
                               onRefresh: () => _load(city: _selectedCity),
                               child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20, 0, 20, 32),
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 0, 20, 32),
                                 itemCount: _filteredProperties.length,
                                 itemBuilder: (_, i) => PropertyCard(
                                     property: _filteredProperties[i]),
@@ -289,27 +225,17 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.05),
-              border:
-                  Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              color: AppColors.accentSoft,
+              border: Border.all(color: AppColors.border),
             ),
             child: const Icon(Icons.home_work_outlined,
-                color: _primary, size: 36),
+                color: AppColors.accent, size: 36),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No Properties Found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _onSurface,
-            ),
-          ),
+          Text('No Properties Found', style: AppText.h4),
           const SizedBox(height: 6),
-          const Text(
-            'Try adjusting your search or filters.',
-            style: TextStyle(fontSize: 14, color: _onSurfaceVariant),
-          ),
+          Text('Try adjusting your search or filters.',
+              style: AppText.bodySmall),
         ],
       ),
     );
