@@ -1,13 +1,13 @@
 // lib/widgets/property_card.dart
-import 'package:flutter/material.dart';
 import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/screens/property_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 
 class PropertyCard extends StatelessWidget {
   final Property property;
 
-  const PropertyCard({Key? key, required this.property}) : super(key: key);
+  const PropertyCard({super.key, required this.property});
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +104,7 @@ class _MetaRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis),
         ),
-        Text('${property.rooms} rooms',
-            style: const TextStyle(fontSize: 11)),
+        Text('${property.rooms} rooms', style: const TextStyle(fontSize: 11)),
         Text('${property.areaMq.toStringAsFixed(0)}m²',
             style: const TextStyle(fontSize: 11)),
       ],

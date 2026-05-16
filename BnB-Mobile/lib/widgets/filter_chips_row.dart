@@ -7,11 +7,11 @@ class FilterChipsRow extends StatelessWidget {
   final Function(String?) onSelected;
 
   const FilterChipsRow({
-    Key? key,
+    super.key,
     required this.options,
     required this.selected,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

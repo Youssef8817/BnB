@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:go_router/go_router.dart';
+import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/repositories/property_repository.dart';
 import 'package:b_and_b/services/api_service.dart';
-import 'package:b_and_b/models/property.dart';
-import 'package:b_and_b/widgets/property_card.dart';
 import 'package:b_and_b/widgets/empty_state.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class MyPropertiesScreen extends StatefulWidget {
-  const MyPropertiesScreen({Key? key}) : super(key: key);
+  const MyPropertiesScreen({super.key});
 
   @override
   _MyPropertiesScreenState createState() => _MyPropertiesScreenState();
@@ -131,10 +130,11 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${property.formattedPrice} • ${property.city}'),
+                            Text(
+                                '${property.formattedPrice} • ${property.city}'),
                             Text(
                               '${property.rooms} rooms • ${property.areaMq.toStringAsFixed(0)}m²',
-                              style: TextStyle(fontSize: 12),
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ],
                         ),
@@ -173,7 +173,7 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
   }
 
   Future<void> _showStatusChangeDialog(Property property) async {
-    String _selected = property.status;
+    String selected = property.status;
     final String? newStatus = await showDialog<String>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -184,21 +184,21 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
             children: [
               RadioListTile<String>(
                 value: 'available',
-                groupValue: _selected,
+                groupValue: selected,
                 title: const Text('Available'),
-                onChanged: (v) => setDialogState(() => _selected = v!),
+                onChanged: (v) => setDialogState(() => selected = v!),
               ),
               RadioListTile<String>(
                 value: 'pending',
-                groupValue: _selected,
+                groupValue: selected,
                 title: const Text('Pending'),
-                onChanged: (v) => setDialogState(() => _selected = v!),
+                onChanged: (v) => setDialogState(() => selected = v!),
               ),
               RadioListTile<String>(
                 value: 'sold',
-                groupValue: _selected,
+                groupValue: selected,
                 title: const Text('Sold'),
-                onChanged: (v) => setDialogState(() => _selected = v!),
+                onChanged: (v) => setDialogState(() => selected = v!),
               ),
             ],
           ),
@@ -208,7 +208,7 @@ class _MyPropertiesScreenState extends State<MyPropertiesScreen> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(_selected),
+              onPressed: () => Navigator.of(context).pop(selected),
               child: const Text('Confirm'),
             ),
           ],

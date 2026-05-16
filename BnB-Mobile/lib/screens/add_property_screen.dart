@@ -1,14 +1,15 @@
 // lib/screens/add_property_screen.dart
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:b_and_b/services/api_service.dart';
+
 import 'package:b_and_b/models/property.dart';
+import 'package:b_and_b/services/api_service.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddPropertyScreen extends StatefulWidget {
   final Property? initialProperty;
 
-  const AddPropertyScreen({Key? key, this.initialProperty}) : super(key: key);
+  const AddPropertyScreen({super.key, this.initialProperty});
 
   @override
   _AddPropertyScreenState createState() => _AddPropertyScreenState();
@@ -60,10 +61,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     final pickedFiles = await picker.pickMultiImage();
     if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImages = pickedFiles
-            .map((file) => File(file.path))
-            .take(3)
-            .toList();
+        _selectedImages =
+            pickedFiles.map((file) => File(file.path)).take(3).toList();
       });
     }
   }
@@ -71,8 +70,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final bool hasImages =
-        _selectedImages.isNotEmpty || (_isEditing && widget.initialProperty!.images.isNotEmpty);
+    final bool hasImages = _selectedImages.isNotEmpty ||
+        (_isEditing && widget.initialProperty!.images.isNotEmpty);
 
     if (!hasImages) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,13 +83,13 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     setState(() => _isLoading = true);
     try {
       final data = {
-        'title':       _titleController.text.trim(),
+        'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
-        'price':       _priceController.text.trim(),
-        'location':    _locationController.text.trim(),
-        'city':        _cityController.text.trim(),
-        'area_m2':     _areaController.text.trim(),
-        'rooms':       _roomsController.text.trim(),
+        'price': _priceController.text.trim(),
+        'location': _locationController.text.trim(),
+        'city': _cityController.text.trim(),
+        'area_m2': _areaController.text.trim(),
+        'rooms': _roomsController.text.trim(),
       };
 
       if (_isEditing) {
@@ -107,7 +106,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditing ? 'Property updated successfully' : 'Property added successfully'),
+            content: Text(_isEditing
+                ? 'Property updated successfully'
+                : 'Property added successfully'),
           ),
         );
       }
@@ -142,8 +143,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                     labelText: 'Title',
                     prefixIcon: Icon(Icons.title),
                   ),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Please enter the title' : null,
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? 'Please enter the title'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -165,8 +167,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                     prefixIcon: Icon(Icons.attach_money),
                   ),
                   keyboardType: TextInputType.number,
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Please enter the price' : null,
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? 'Please enter the price'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -268,7 +271,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                       ),
                     ),
                   )
-                else if (_isEditing && widget.initialProperty!.images.isNotEmpty)
+                else if (_isEditing &&
+                    widget.initialProperty!.images.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
@@ -293,7 +297,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : Text(_isEditing ? 'Update Property' : 'Submit Property'),
+                        : Text(
+                            _isEditing ? 'Update Property' : 'Submit Property'),
                   ),
                 ),
               ],

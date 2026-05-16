@@ -1,5 +1,4 @@
 // lib/models/property.dart
-import 'package:b_and_b/constants.dart';
 import 'package:b_and_b/models/property_image.dart';
 
 class Property {

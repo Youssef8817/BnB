@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class RoleBadge extends StatelessWidget {
   final String role;
 
-  const RoleBadge({Key? key, required this.role}) : super(key: key);
+  const RoleBadge({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {

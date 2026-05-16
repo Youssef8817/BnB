@@ -1,13 +1,13 @@
 // lib/screens/worker_services_screen.dart
-import 'package:flutter/material.dart';
-import 'package:b_and_b/repositories/service_repository.dart';
 import 'package:b_and_b/models/worker_service.dart';
-import 'package:b_and_b/widgets/service_card.dart';
-import 'package:b_and_b/widgets/filter_chips_row.dart';
+import 'package:b_and_b/repositories/service_repository.dart';
 import 'package:b_and_b/widgets/empty_state.dart';
+import 'package:b_and_b/widgets/filter_chips_row.dart';
+import 'package:b_and_b/widgets/service_card.dart';
+import 'package:flutter/material.dart';
 
 class WorkerServicesScreen extends StatefulWidget {
-  const WorkerServicesScreen({Key? key}) : super(key: key);
+  const WorkerServicesScreen({super.key});
 
   @override
   _WorkerServicesScreenState createState() => _WorkerServicesScreenState();
@@ -53,8 +53,16 @@ class _WorkerServicesScreenState extends State<WorkerServicesScreen> {
         children: [
           // Filter chips row for type
           FilterChipsRow(
-            options: ['All', 'plumbing', 'painting', 'tiling', 'electrical', 'carpentry', 'finishing'],
-            selected: _selectedType == null ? 'All' : _selectedType,
+            options: const [
+              'All',
+              'plumbing',
+              'painting',
+              'tiling',
+              'electrical',
+              'carpentry',
+              'finishing'
+            ],
+            selected: _selectedType ?? 'All',
             onSelected: (value) {
               if (value == 'All') {
                 setState(() {

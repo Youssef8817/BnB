@@ -4,7 +4,7 @@ import 'package:b_and_b/models/property.dart';
 
 class PropertyRepository {
   Future<List<Property>> getAll({String? city, String? status, double? minPrice, double? maxPrice}) async {
-    return ApiService.getProperties(
+    return  ApiService.getProperties(
       city: city,
       status: status,
       minPrice: minPrice,
@@ -16,3 +16,7 @@ class PropertyRepository {
     return await ApiService.getMyProperties();
   }
 }
+
+
+
+

@@ -1,20 +1,20 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+
+import 'package:b_and_b/constants.dart';
 import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/models/user.dart';
 import 'package:b_and_b/services/api_service.dart';
-import 'package:b_and_b/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
 
-  const PropertyDetailScreen({Key? key, required this.property})
-      : super(key: key);
+  const PropertyDetailScreen({super.key, required this.property});
 
   @override
   _PropertyDetailScreenState createState() => _PropertyDetailScreenState();
@@ -59,8 +59,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   Future<void> _updatePropertyStatus(String newStatus) async {
     setState(() => _isLoading = true);
     try {
-      await ApiService.updatePropertyStatus(
-          widget.property.id, newStatus);
+      await ApiService.updatePropertyStatus(widget.property.id, newStatus);
       // Update the property's status in the state
       setState(() {
         // We are not updating the property object in the state because it's passed in.
@@ -188,7 +187,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                   );
                   if (result == true) {
                     messenger.showSnackBar(
-                      const SnackBar(content: Text('Property updated successfully')),
+                      const SnackBar(
+                          content: Text('Property updated successfully')),
                     );
                   }
                 } else if (value == 'delete') {
@@ -266,53 +266,53 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               children: [
                 Text(
                   widget.property.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   widget.property.formattedPrice,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     color: Colors.green,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Location: ${widget.property.location}',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'City: ${widget.property.city}',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Area: ${widget.property.areaMq.toStringAsFixed(0)} m²',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Rooms: ${widget.property.rooms}',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'Description:',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   widget.property.description,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 // Call Owner button
                 ElevatedButton.icon(
                   onPressed: _callOwner,
@@ -323,12 +323,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                 // Status dropdown (only for owner)
                 if (_isOwner)
                   DropdownButtonFormField<String>(
-                    value: widget.property.status,
+                    initialValue: widget.property.status,
                     decoration: const InputDecoration(
                       labelText: 'Status',
                       border: OutlineInputBorder(),
                     ),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: 'available',
                         child: Text('Available'),
