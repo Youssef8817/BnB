@@ -56,7 +56,7 @@ struct PropertyModel {
         model.city       = json["city"].toString();
         model.location   = json["location"].toString();
         model.status     = json["status"].toString();
-        model.price      = json["price"].toString().toDouble(); // API returns formatted string
+        model.price      = json["price"].toDouble();
         model.rooms      = json["rooms"].toInt();
         model.areaMq     = json["area_m2"].toDouble();
         model.ownerName  = json["owner"].toObject()["name"].toString();
@@ -96,7 +96,7 @@ struct WorkerServiceModel {
         model.unit         = json["unit"].toString();
         model.workerName   = json["worker"].toObject()["name"].toString();
         model.workerPhone  = json["worker"].toObject()["phone"].toString();
-        model.pricePerUnit = json["price_per_unit"].toString().toDouble();
+        model.pricePerUnit = json["price_per_unit"].toDouble();
         model.isAvailable  = json["is_available"].toBool();
         return model;
     }

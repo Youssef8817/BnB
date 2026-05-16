@@ -143,11 +143,11 @@ void StatsTab::loadData()
         [this](QJsonObject statsData) {
             totalUsersLabel->setText(QString::number(statsData["total_users"].toInt()));
             totalWorkersLabel->setText(QString::number(statsData["total_workers"].toInt()));
-            propertiesLabel->setText(QString::number(statsData["properties"].toInt()));
-            requestsLabel->setText(QString::number(statsData["requests"].toInt()));
-            pendingLabel->setText(QString::number(statsData["pending"].toInt()));
+            propertiesLabel->setText(QString::number(statsData["total_properties"].toInt()));
+            requestsLabel->setText(QString::number(statsData["total_requests"].toInt()));
+            pendingLabel->setText(QString::number(statsData["pending_requests"].toInt()));
 
-            ApiClient::instance()->get("/properties", "properties_for_chart",
+            ApiClient::instance()->get("/properties?per_page=500", "properties_for_chart",
                 [this](QJsonObject propertiesData) {
                     QJsonArray properties = propertiesData["data"].toArray();
                     QMap<QString, int> cityCounts;

@@ -88,7 +88,7 @@ RequestsTab::RequestsTab(QWidget *parent)
 void RequestsTab::loadData()
 {
     setLoading(true);
-    ApiClient::instance()->get("/admin/requests", "requests_load",
+    ApiClient::instance()->get("/admin/requests?per_page=500", "requests_load",
         [this](QJsonObject data) {
             QJsonArray requests = data["data"].toArray();
             populateTableFromArray(requests, [](QJsonObject obj) {

@@ -88,7 +88,7 @@ void ActivityLogTab::loadData()
 {
     QDate fromDate = _fromDate->date();
     QDate toDate   = _toDate->date();
-    QString query  = QString("?from=%1&to=%2")
+    QString query  = QString("?per_page=500&from=%1&to=%2")
         .arg(fromDate.toString("yyyy-MM-dd"))
         .arg(toDate.toString("yyyy-MM-dd"));
 

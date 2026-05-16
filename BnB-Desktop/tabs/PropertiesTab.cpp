@@ -82,7 +82,7 @@ PropertiesTab::PropertiesTab(QWidget *parent)
 void PropertiesTab::loadData()
 {
     setLoading(true);
-    ApiClient::instance()->get("/properties", "properties_load",
+    ApiClient::instance()->get("/properties?per_page=500", "properties_load",
         [this](QJsonObject data) {
             QJsonArray properties = data["data"].toArray();
             _properties.clear();

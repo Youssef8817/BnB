@@ -55,7 +55,7 @@ ReviewsTab::ReviewsTab(QWidget *parent)
 void ReviewsTab::loadData()
 {
     setLoading(true);
-    ApiClient::instance()->get("/admin/reviews", "reviews_load",
+    ApiClient::instance()->get("/admin/reviews?per_page=500", "reviews_load",
         [this](QJsonObject data) {
             QJsonArray reviews = data["data"].toArray();
             TableManager::populate(_table, reviews, [](QJsonObject obj) {
@@ -73,14 +73,13 @@ void ReviewsTab::loadData()
             for (int row = 0; row < _table->rowCount(); ++row) {
                 int id = _table->item(row, 0)->text().toInt();
                 TableManager::addActionButton(_table, row, 6, "Delete",
-                    [this, id, row]() {
+                    [this, id]() {
                         if (ConfirmDialog::ask(this, QString("Delete review #%1?").arg(id))) {
                             setLoading(true);
                             ApiClient::instance()->deleteResource(
                                 QString("/admin/reviews/%1").arg(id), "delete_review",
-                                [this, row](QJsonObject) {
-                                    _table->removeRow(row);
-                                    setLoading(false);
+                                [this](QJsonObject) {
+                                    loadData();
                                 },
                                 [this](QString message) {
                                     showError(message);

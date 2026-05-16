@@ -95,7 +95,7 @@ UsersTab::UsersTab(QWidget *parent)
 void UsersTab::loadData()
 {
     setLoading(true);
-    ApiClient::instance()->get("/admin/users", "users_load",
+    ApiClient::instance()->get("/admin/users?per_page=500", "users_load",
         [this](QJsonObject data) {
             QJsonArray users = data["data"].toArray();
             TableManager::populate(_table, users, [](QJsonObject userObj) {

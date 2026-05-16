@@ -31,10 +31,13 @@ signals:
 
 private:
     explicit ApiClient(QObject *parent = nullptr);
+    void handleReply(QNetworkReply* reply,
+                     std::function<void(QJsonObject)> onSuccess,
+                     std::function<void(QString)> onError);
     static const QString BASE_URL;
     QNetworkAccessManager* _manager;
     QSettings* _settings;
-    QMap<QNetworkReply*, QString> _pendingRequests; // Maps reply to requestId
+    QMap<QNetworkReply*, QString> _pendingRequests;
     int _pendingRequestsCount;
 };
 

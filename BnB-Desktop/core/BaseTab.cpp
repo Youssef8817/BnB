@@ -36,7 +36,7 @@ void BaseTab::setLoading(bool loading)
         _refreshBtn->setEnabled(!loading);
         _refreshBtn->setText(loading ? "Loading…" : "Refresh");
     }
-    if (_statusLabel && !loading) {
+    if (_statusLabel && !loading && !_statusLabel->text().startsWith("⚠")) {
         clearStatus();
     }
 }
