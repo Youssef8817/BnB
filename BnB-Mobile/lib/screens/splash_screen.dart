@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -165,55 +164,28 @@ class _AmbientBackdrop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        // Centre radial glow
-        Center(
+        // Top-right purple glow — full screen
+        Positioned.fill(
           child: Container(
-            width: 500,
-            height: 500,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
+            decoration: const BoxDecoration(
               gradient: RadialGradient(
-                colors: [
-                  const Color(0xFFD0BCFF).withValues(alpha: 0.08),
-                  Colors.transparent,
-                ],
+                center: Alignment.topRight,
+                radius: 1.2,
+                colors: [Color(0x1AD0BCFF), Colors.transparent],
               ),
             ),
           ),
         ),
-        // Top-right purple blob
-        Positioned(
-          top: -60,
-          right: -60,
-          child: ClipOval(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0x14D0BCFF),
-                ),
-              ),
-            ),
-          ),
-        ),
-        // Bottom-left blue blob
-        Positioned(
-          bottom: -60,
-          left: -60,
-          child: ClipOval(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0x1489CEFF),
-                ),
+        // Bottom-left blue glow — full screen
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.bottomLeft,
+                radius: 1.2,
+                colors: [Color(0x1A89CEFF), Colors.transparent],
               ),
             ),
           ),
