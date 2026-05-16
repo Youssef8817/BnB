@@ -3,6 +3,7 @@
 #include "core/DataModels.h"
 #include "core/TableManager.h"
 #include "core/CsvExporter.h"
+#include "core/Theme.h"
 #include "dialogs/ConfirmDialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -19,50 +20,63 @@
 UsersTab::UsersTab(QWidget *parent)
     : BaseTab(parent)
 {
-    // Create the layout for this tab
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 20, 24, 20);
+    mainLayout->setSpacing(16);
 
-    // Create a layout for the filter controls
+    // ── Header ────────────────────────────────────────────────────────────────
+    QLabel* heading = new QLabel("Users");
+    heading->setStyleSheet(QString(R"(
+        QLabel {
+            color: %1; font-size: 20px; font-weight: 800;
+            letter-spacing: -0.3px; background: transparent; border: none;
+        }
+    )").arg(Theme::TEXT_PRIMARY));
+    mainLayout->addWidget(heading);
+
+    // ── Filter row ────────────────────────────────────────────────────────────
     QHBoxLayout* filterLayout = new QHBoxLayout();
+    filterLayout->setSpacing(10);
 
-    // Search box
     _searchEdit = new QLineEdit();
-    _searchEdit->setPlaceholderText("Search by name or email");
-    filterLayout->addWidget(new QLabel("Search:"));
-    filterLayout->addWidget(_searchEdit);
+    _searchEdit->setPlaceholderText("Search by name or email…");
+    _searchEdit->setFixedHeight(38);
+    filterLayout->addWidget(_searchEdit, 1);
 
-    // Role filter
     _roleFilter = new QComboBox();
+    _roleFilter->setFixedHeight(38);
     _roleFilter->addItem("All Roles");
     _roleFilter->addItem("admin");
     _roleFilter->addItem("user");
-    filterLayout->addWidget(new QLabel("Role:"));
+    _roleFilter->addItem("worker");
     filterLayout->addWidget(_roleFilter);
+
+    _refreshBtn = new QPushButton("Refresh");
+    _refreshBtn->setFixedHeight(38);
+    _refreshBtn->setCursor(Qt::PointingHandCursor);
+    filterLayout->addWidget(_refreshBtn);
+
+    QPushButton* exportBtn = new QPushButton("Export CSV");
+    exportBtn->setObjectName("outlineBtn");
+    exportBtn->setFixedHeight(38);
+    exportBtn->setCursor(Qt::PointingHandCursor);
+    filterLayout->addWidget(exportBtn);
 
     mainLayout->addLayout(filterLayout);
 
-    // Create the table
+    // ── Table ─────────────────────────────────────────────────────────────────
     _table = new QTableWidget();
     QStringList headers = {"ID", "Name", "Email", "Role", "Phone", "Created"};
     TableManager::setup(_table, headers);
-    mainLayout->addWidget(_table);
+    setupTable(headers);
+    mainLayout->addWidget(_table, 1);
 
-    // Button row: Refresh + Export CSV
-    QHBoxLayout* btnLayout = new QHBoxLayout();
-    _refreshBtn = new QPushButton("Refresh");
-    QPushButton* exportBtn = new QPushButton("Export CSV");
-    btnLayout->addWidget(_refreshBtn);
-    btnLayout->addWidget(exportBtn);
-    btnLayout->addStretch();
-    mainLayout->addLayout(btnLayout);
-
-    // Status label
+    // ── Status bar ────────────────────────────────────────────────────────────
     _statusLabel = new QLabel("Ready");
+    clearStatus();
     mainLayout->addWidget(_statusLabel);
 
-    connect(exportBtn, &QPushButton::clicked, this, &UsersTab::exportCsv);
-
-    // Set up context menu
+    // ── Context menu ──────────────────────────────────────────────────────────
     _table->setContextMenuPolicy(Qt::CustomContextMenu);
     _contextMenu = new QMenu(this);
     QAction* deleteAction = _contextMenu->addAction("Delete User");
@@ -70,8 +84,9 @@ UsersTab::UsersTab(QWidget *parent)
     connect(deleteAction, &QAction::triggered, this, &UsersTab::deleteUser);
     connect(exportAction, &QAction::triggered, this, &UsersTab::exportCsv);
 
-    // Connect signals
+    // ── Signals ───────────────────────────────────────────────────────────────
     connect(_refreshBtn, &QPushButton::clicked, this, &UsersTab::loadData);
+    connect(exportBtn,   &QPushButton::clicked, this, &UsersTab::exportCsv);
     connect(_searchEdit, &QLineEdit::textChanged, this, &UsersTab::filterRows);
     connect(_roleFilter, &QComboBox::currentTextChanged, this, &UsersTab::filterRows);
     connect(_table, &QTableWidget::customContextMenuRequested, this, &UsersTab::showContextMenu);
@@ -80,11 +95,8 @@ UsersTab::UsersTab(QWidget *parent)
 void UsersTab::loadData()
 {
     setLoading(true);
-    clearStatus();
-    // Use a fixed requestId for simplicity
     ApiClient::instance()->get("/admin/users", "users_load",
         [this](QJsonObject data) {
-            // Assuming the data is in the "data" field as an array
             QJsonArray users = data["data"].toArray();
             TableManager::populate(_table, users, [](QJsonObject userObj) {
                 DataModels::UserModel user = DataModels::UserModel::fromJson(userObj);
@@ -94,7 +106,7 @@ void UsersTab::loadData()
                     user.email,
                     user.role,
                     user.phone,
-                    user.createdAt.toString(Qt::ISODate)
+                    user.createdAt.toString("yyyy-MM-dd")
                 };
             });
             setLoading(false);
@@ -112,64 +124,42 @@ void UsersTab::filterRows()
 
     for (int row = 0; row < _table->rowCount(); ++row) {
         bool matches = true;
-
-        // Check search text in name and email columns (columns 1 and 2)
         if (!searchText.isEmpty()) {
-            QString name = _table->item(row, 1)->text().toLower();
+            QString name  = _table->item(row, 1)->text().toLower();
             QString email = _table->item(row, 2)->text().toLower();
-            if (!name.contains(searchText) && !email.contains(searchText)) {
+            if (!name.contains(searchText) && !email.contains(searchText))
                 matches = false;
-            }
         }
-
-        // Check role filter (column 3)
         if (matches && roleFilter != "All Roles") {
-            QString role = _table->item(row, 3)->text();
-            if (role != roleFilter) {
+            if (_table->item(row, 3)->text() != roleFilter)
                 matches = false;
-            }
         }
-
         _table->setRowHidden(row, !matches);
     }
 }
 
 void UsersTab::showContextMenu(const QPoint& pos)
 {
-    // Global position for the menu
-    QPoint globalPos = _table->viewport()->mapToGlobal(pos);
-    _contextMenu->exec(globalPos);
+    _contextMenu->exec(_table->viewport()->mapToGlobal(pos));
 }
 
 void UsersTab::deleteUser()
 {
-    // Get the currently selected row
-    QList<QTableWidgetItem*> selectedItems = _table->selectedItems();
-    if (selectedItems.isEmpty()) {
+    auto selected = _table->selectedItems();
+    if (selected.isEmpty()) {
         QMessageBox::warning(this, "No Selection", "Please select a user to delete.");
         return;
     }
+    int row = selected.first()->row();
+    int id  = _table->item(row, 0)->text().toInt();
 
-    int row = selectedItems.first()->row();
-    QString idStr = _table->item(row, 0)->text();
-    bool ok;
-    int id = idStr.toInt(&ok);
-    if (!ok) {
-        QMessageBox::warning(this, "Error", "Invalid user ID.");
-        return;
-    }
-
-    // Confirm deletion
-    if (ConfirmDialog::ask(this, QString("Are you sure you want to delete user ID %1?").arg(id))) {
+    if (ConfirmDialog::ask(this, QString("Delete user #%1? This cannot be undone.").arg(id))) {
         setLoading(true);
-        clearStatus();
         ApiClient::instance()->deleteResource(QString("/admin/users/%1").arg(id), "delete_user",
-            [this, id](QJsonObject data) {
-                QMessageBox::information(this, "Success", "User deleted successfully.");
-                // Remove the row from the table
-                for (int row = 0; row < _table->rowCount(); ++row) {
-                    if (_table->item(row, 0)->text() == QString::number(id)) {
-                        _table->removeRow(row);
+            [this, id](QJsonObject) {
+                for (int r = 0; r < _table->rowCount(); ++r) {
+                    if (_table->item(r, 0)->text().toInt() == id) {
+                        _table->removeRow(r);
                         break;
                     }
                 }
@@ -184,9 +174,5 @@ void UsersTab::deleteUser()
 
 void UsersTab::exportCsv()
 {
-    if (CsvExporter::exportTable(_table, this, "users")) {
-        // Success message is shown by CsvExporter
-    } else {
-        // User cancelled or error occurred
-    }
+    CsvExporter::exportTable(_table, this, "users");
 }

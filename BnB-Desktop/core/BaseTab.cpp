@@ -1,4 +1,5 @@
 #include "BaseTab.h"
+#include "Theme.h"
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -7,43 +8,53 @@
 BaseTab::BaseTab(QWidget *parent)
     : QWidget(parent)
 {
-    // Note: The actual UI setup (like creating _table, _refreshBtn, _statusLabel) 
-    // is expected to be done in the derived classes, but we can provide a basic setup here if needed.
-    // However, the plan says that the derived classes will set up their own UI and call setupTable.
-    // So we leave the constructor empty for now, or we can initialize the pointers to nullptr.
-    _table = nullptr;
-    _refreshBtn = nullptr;
+    _table       = nullptr;
+    _refreshBtn  = nullptr;
     _statusLabel = nullptr;
 }
 
 void BaseTab::setupTable(QStringList headers)
 {
-    if (!_table) {
-        return; // or we could create the table here, but the plan expects the derived class to create it.
-    }
+    if (!_table) return;
     _table->setColumnCount(headers.size());
     _table->setHorizontalHeaderLabels(headers);
     _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     _table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    _table->setSelectionMode(QAbstractItemView::SingleSelection);
     _table->horizontalHeader()->setStretchLastSection(true);
+    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    _table->verticalHeader()->setVisible(false);
+    _table->setShowGrid(false);
     _table->setAlternatingRowColors(true);
+    _table->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    _table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
 void BaseTab::setLoading(bool loading)
 {
     if (_refreshBtn) {
         _refreshBtn->setEnabled(!loading);
+        _refreshBtn->setText(loading ? "Loading…" : "Refresh");
     }
-    if (_statusLabel) {
-        _statusLabel->setText(loading ? "Loading..." : "Ready");
+    if (_statusLabel && !loading) {
+        clearStatus();
     }
 }
 
 void BaseTab::showError(const QString& msg)
 {
     if (_statusLabel) {
-        _statusLabel->setText("Error: " + msg);
-        _statusLabel->setStyleSheet("color: red");
+        _statusLabel->setText("⚠  " + msg);
+        _statusLabel->setStyleSheet(QString(R"(
+            QLabel {
+                color: %1;
+                background: rgba(255,83,112,0.10);
+                border: 1px solid rgba(255,83,112,0.25);
+                border-radius: 8px;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        )").arg(Theme::ERROR));
     }
 }
 
@@ -51,15 +62,22 @@ void BaseTab::clearStatus()
 {
     if (_statusLabel) {
         _statusLabel->setText("Ready");
-        _statusLabel->setStyleSheet("");
+        _statusLabel->setStyleSheet(QString(R"(
+            QLabel {
+                color: %1;
+                background: transparent;
+                border: none;
+                font-size: 12px;
+                padding: 4px 0;
+            }
+        )").arg(Theme::TEXT_MUTED));
     }
 }
 
-void BaseTab::populateTableFromArray(const QJsonArray& items, std::function<QStringList(QJsonObject)> rowMapper)
+void BaseTab::populateTableFromArray(const QJsonArray& items,
+    std::function<QStringList(QJsonObject)> rowMapper)
 {
-    if (!_table) {
-        return;
-    }
+    if (!_table) return;
     _table->setRowCount(0);
     for (int i = 0; i < items.size(); ++i) {
         QJsonObject item = items[i].toObject();

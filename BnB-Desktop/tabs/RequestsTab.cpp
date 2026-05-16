@@ -1,6 +1,7 @@
 #include "RequestsTab.h"
 #include "core/ApiClient.h"
 #include "core/DataModels.h"
+#include "core/Theme.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -14,44 +15,72 @@
 RequestsTab::RequestsTab(QWidget *parent)
     : BaseTab(parent)
 {
-    // Create the layout for this tab
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 20, 24, 20);
+    mainLayout->setSpacing(16);
 
-    // Create a layout for the filter controls
+    // ── Header ────────────────────────────────────────────────────────────────
+    QHBoxLayout* headerRow = new QHBoxLayout();
+    QLabel* heading = new QLabel("Service Requests");
+    heading->setStyleSheet(QString(R"(
+        QLabel {
+            color: %1; font-size: 20px; font-weight: 800;
+            letter-spacing: -0.3px; background: transparent; border: none;
+        }
+    )").arg(Theme::TEXT_PRIMARY));
+    headerRow->addWidget(heading);
+    headerRow->addStretch();
+
+    QLabel* autoLabel = new QLabel("Auto-refreshes every 60s");
+    autoLabel->setStyleSheet(QString(R"(
+        QLabel {
+            color: %1; font-size: 11px;
+            background: rgba(79,195,247,0.08);
+            border: 1px solid rgba(79,195,247,0.20);
+            border-radius: 6px;
+            padding: 4px 10px;
+        }
+    )").arg(Theme::CYAN));
+    headerRow->addWidget(autoLabel);
+    mainLayout->addLayout(headerRow);
+
+    // ── Filter row ────────────────────────────────────────────────────────────
     QHBoxLayout* filterLayout = new QHBoxLayout();
+    filterLayout->setSpacing(10);
 
-    // Status filter
     _statusFilter = new QComboBox();
-    _statusFilter->addItem("All");
+    _statusFilter->setFixedHeight(38);
+    _statusFilter->addItem("All Statuses");
     _statusFilter->addItem("pending");
     _statusFilter->addItem("accepted");
     _statusFilter->addItem("completed");
     _statusFilter->addItem("cancelled");
-    filterLayout->addWidget(new QLabel("Status:"));
     filterLayout->addWidget(_statusFilter);
+    filterLayout->addStretch();
+
+    _refreshBtn = new QPushButton("Refresh");
+    _refreshBtn->setFixedHeight(38);
+    _refreshBtn->setCursor(Qt::PointingHandCursor);
+    filterLayout->addWidget(_refreshBtn);
 
     mainLayout->addLayout(filterLayout);
 
-    // Create the table
+    // ── Table ─────────────────────────────────────────────────────────────────
     _table = new QTableWidget();
     QStringList headers = {"ID", "User", "Service Type", "Worker", "Address", "Status", "Date"};
     setupTable(headers);
-    mainLayout->addWidget(_table);
+    mainLayout->addWidget(_table, 1);
 
-    // Create refresh button
-    _refreshBtn = new QPushButton("Refresh");
-    mainLayout->addWidget(_refreshBtn);
-
-    // Status label
+    // ── Status ────────────────────────────────────────────────────────────────
     _statusLabel = new QLabel("Ready");
+    clearStatus();
     mainLayout->addWidget(_statusLabel);
 
-    // Set up auto-refresh timer
+    // Auto-refresh timer
     _autoRefreshTimer = new QTimer(this);
-    _autoRefreshTimer->setInterval(60000); // 60 seconds
+    _autoRefreshTimer->setInterval(60000);
 
-    // Connect signals
-    connect(_refreshBtn, &QPushButton::clicked, this, &RequestsTab::loadData);
+    connect(_refreshBtn,   &QPushButton::clicked, this, &RequestsTab::loadData);
     connect(_statusFilter, &QComboBox::currentTextChanged, this, &RequestsTab::filterRows);
     connect(_autoRefreshTimer, &QTimer::timeout, this, &RequestsTab::autoRefresh);
 }
@@ -59,21 +88,19 @@ RequestsTab::RequestsTab(QWidget *parent)
 void RequestsTab::loadData()
 {
     setLoading(true);
-    clearStatus();
     ApiClient::instance()->get("/admin/requests", "requests_load",
         [this](QJsonObject data) {
-            // Assuming the data is in the "data" field as an array
             QJsonArray requests = data["data"].toArray();
-            populateTableFromArray(requests, [](QJsonObject requestObj) {
-                DataModels::ServiceRequestModel request = DataModels::ServiceRequestModel::fromJson(requestObj);
+            populateTableFromArray(requests, [](QJsonObject obj) {
+                DataModels::ServiceRequestModel r = DataModels::ServiceRequestModel::fromJson(obj);
                 return QStringList{
-                    QString::number(request.id),
-                    request.userName,
-                    request.serviceType,
-                    request.workerName,
-                    request.address,
-                    request.status,
-                    request.createdAt.toString(Qt::ISODate)
+                    QString::number(r.id),
+                    r.userName,
+                    r.serviceType,
+                    r.workerName,
+                    r.address,
+                    r.status,
+                    r.createdAt.toString("yyyy-MM-dd")
                 };
             });
             setLoading(false);
@@ -86,28 +113,15 @@ void RequestsTab::loadData()
 
 void RequestsTab::filterRows()
 {
-    QString statusFilter = _statusFilter->currentText();
-
+    QString filter = _statusFilter->currentText();
     for (int row = 0; row < _table->rowCount(); ++row) {
-        bool matches = true;
-
-        // Check status filter (column 5)
-        if (matches && statusFilter != "All") {
-            QString status = _table->item(row, 5)->text();
-            if (status != statusFilter) {
-                matches = false;
-            }
-        }
-
-        _table->setRowHidden(row, !matches);
+        bool ok = (filter == "All Statuses") || (_table->item(row, 5)->text() == filter);
+        _table->setRowHidden(row, !ok);
     }
 }
 
 void RequestsTab::autoRefresh()
 {
-    // Only refresh if the tab is currently visible
-    // We assume that the parent (MainWindow) will handle starting and stopping the timer based on visibility.
-    // For now, we just refresh.
     loadData();
 }
 

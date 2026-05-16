@@ -26,7 +26,8 @@ private:
     QLabel* lastUpdatedLabel;
     ChartWidget* chartWidget;
 
-    QLabel* createCard(const QString& title, int initialCount, QHBoxLayout* layout);
+    QLabel* createCard(const QString& title, const QString& icon,
+                       const QString& accentColor, QHBoxLayout* layout);
 };
 
 #endif // STATSTAB_H

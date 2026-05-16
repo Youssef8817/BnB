@@ -46,6 +46,7 @@ set(HEADERS
     core/DataModels.h
     core/SettingsManager.h
     core/TableManager.h
+    core/Theme.h
 
     # Windows
     windows/LoginWindow.h

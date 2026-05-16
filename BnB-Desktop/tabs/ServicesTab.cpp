@@ -1,6 +1,7 @@
 #include "ServicesTab.h"
 #include "core/ApiClient.h"
 #include "core/DataModels.h"
+#include "core/Theme.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -13,14 +14,26 @@
 ServicesTab::ServicesTab(QWidget *parent)
     : BaseTab(parent)
 {
-    // Create the layout for this tab
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 20, 24, 20);
+    mainLayout->setSpacing(16);
 
-    // Create a layout for the filter controls
+    // ── Header ────────────────────────────────────────────────────────────────
+    QLabel* heading = new QLabel("Services");
+    heading->setStyleSheet(QString(R"(
+        QLabel {
+            color: %1; font-size: 20px; font-weight: 800;
+            letter-spacing: -0.3px; background: transparent; border: none;
+        }
+    )").arg(Theme::TEXT_PRIMARY));
+    mainLayout->addWidget(heading);
+
+    // ── Filter row ────────────────────────────────────────────────────────────
     QHBoxLayout* filterLayout = new QHBoxLayout();
+    filterLayout->setSpacing(10);
 
-    // Type filter
     _typeFilter = new QComboBox();
+    _typeFilter->setFixedHeight(38);
     _typeFilter->addItem("All Types");
     _typeFilter->addItem("plumbing");
     _typeFilter->addItem("painting");
@@ -28,26 +41,27 @@ ServicesTab::ServicesTab(QWidget *parent)
     _typeFilter->addItem("electrical");
     _typeFilter->addItem("carpentry");
     _typeFilter->addItem("finishing");
-    filterLayout->addWidget(new QLabel("Type:"));
     filterLayout->addWidget(_typeFilter);
+    filterLayout->addStretch();
+
+    _refreshBtn = new QPushButton("Refresh");
+    _refreshBtn->setFixedHeight(38);
+    _refreshBtn->setCursor(Qt::PointingHandCursor);
+    filterLayout->addWidget(_refreshBtn);
 
     mainLayout->addLayout(filterLayout);
 
-    // Create the table
+    // ── Table ─────────────────────────────────────────────────────────────────
     _table = new QTableWidget();
     QStringList headers = {"ID", "Type", "Worker", "Price/Unit", "Unit", "Available"};
     setupTable(headers);
-    mainLayout->addWidget(_table);
+    mainLayout->addWidget(_table, 1);
 
-    // Create refresh button
-    _refreshBtn = new QPushButton("Refresh");
-    mainLayout->addWidget(_refreshBtn);
-
-    // Status label
+    // ── Status ────────────────────────────────────────────────────────────────
     _statusLabel = new QLabel("Ready");
+    clearStatus();
     mainLayout->addWidget(_statusLabel);
 
-    // Connect signals
     connect(_refreshBtn, &QPushButton::clicked, this, &ServicesTab::loadData);
     connect(_typeFilter, &QComboBox::currentTextChanged, this, &ServicesTab::filterRows);
 }
@@ -55,21 +69,18 @@ ServicesTab::ServicesTab(QWidget *parent)
 void ServicesTab::loadData()
 {
     setLoading(true);
-    clearStatus();
-    // Use a fixed requestId for simplicity
     ApiClient::instance()->get("/worker-services", "services_load",
         [this](QJsonObject data) {
-            // Assuming the data is in the "data" field as an array
             QJsonArray services = data["data"].toArray();
-            populateTableFromArray(services, [](QJsonObject serviceObj) {
-                DataModels::WorkerServiceModel service = DataModels::WorkerServiceModel::fromJson(serviceObj);
+            populateTableFromArray(services, [](QJsonObject obj) {
+                DataModels::WorkerServiceModel s = DataModels::WorkerServiceModel::fromJson(obj);
                 return QStringList{
-                    QString::number(service.id),
-                    service.type,
-                    service.workerName,
-                    QString::number(service.pricePerUnit, 'f', 2),
-                    service.unit,
-                    service.isAvailable ? "Yes" : "No"
+                    QString::number(s.id),
+                    s.type,
+                    s.workerName,
+                    QString("$%1").arg(s.pricePerUnit, 0, 'f', 2),
+                    s.unit,
+                    s.isAvailable ? "✓ Yes" : "✗ No"
                 };
             });
             setLoading(false);
@@ -83,18 +94,8 @@ void ServicesTab::loadData()
 void ServicesTab::filterRows()
 {
     QString typeFilter = _typeFilter->currentText();
-
     for (int row = 0; row < _table->rowCount(); ++row) {
-        bool matches = true;
-
-        // Check type filter (column 1)
-        if (matches && typeFilter != "All Types") {
-            QString type = _table->item(row, 1)->text();
-            if (type != typeFilter) {
-                matches = false;
-            }
-        }
-
-        _table->setRowHidden(row, !matches);
+        bool ok = (typeFilter == "All Types") || (_table->item(row, 1)->text() == typeFilter);
+        _table->setRowHidden(row, !ok);
     }
 }
