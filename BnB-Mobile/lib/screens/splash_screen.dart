@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
       curve: const Interval(0.6, 0.85, curve: Curves.easeOut),
     );
 
-    Future.delayed(const Duration(milliseconds: 3200), () {
+    Future.delayed(const Duration(seconds: 20), () {
       if (mounted) context.go('/home');
     });
   }
@@ -204,13 +204,7 @@ class _LogoBadge extends StatelessWidget {
       width: 140,
       height: 140,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(36),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1E1445), Color(0xFF0D1424)],
-        ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF7C5CFC).withValues(alpha: 0.45),
@@ -225,25 +219,11 @@ class _LogoBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(36),
-              gradient: const RadialGradient(
-                center: Alignment(-0.3, -0.4),
-                radius: 0.8,
-                colors: [Color(0x30B69EFF), Colors.transparent],
-              ),
-            ),
-          ),
-          const Icon(
-            Icons.location_city_rounded,
-            color: AppColors.accent,
-            size: 72,
-          ),
-        ],
+      child: ClipOval(
+        child: Image.asset(
+          'assets/logo/Logo.png',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
