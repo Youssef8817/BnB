@@ -27,7 +27,7 @@ class PropertyResource extends JsonResource
             'rooms' => (int) $this->rooms,
             'status' => $this->status,
             'image_urls' => $this->images->map(function ($image) {
-                return Storage::url($image->path);
+                return url(Storage::url($image->path));
             }),
             'owner' => [
                 'id' => (int) $this->owner->id,
