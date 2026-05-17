@@ -101,28 +101,23 @@ class _LoginScreenState extends State<LoginScreen>
                         // ── Top logo ──────────────────────────────────────
                         Center(
                           child: Container(
-                            width: 72,
-                            height: 72,
+                            width: 80,
+                            height: 80,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF1E1445), Color(0xFF0D1424)],
-                              ),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.10),
-                              ),
+                              shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF7C5CFC).withValues(alpha: 0.35),
+                                  color: const Color(0xFF7C5CFC).withValues(alpha: 0.4),
                                   blurRadius: 32,
                                   offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.location_city_rounded,
-                              color: AppColors.accent,
-                              size: 36,
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/logo/Logo.png',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),

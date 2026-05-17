@@ -106,12 +106,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // ── Back ─────────────────────────────────────────
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: BackButton2(onTap: () => context.pop()),
-                        ),
-                        const SizedBox(height: 24),
 
                         // ── Headings ──────────────────────────────────────
                         ShaderMask(
