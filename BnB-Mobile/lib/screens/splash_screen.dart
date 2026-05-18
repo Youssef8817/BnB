@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
       curve: const Interval(0.6, 0.85, curve: Curves.easeOut),
     );
 
-    Future.delayed(const Duration(seconds: 20), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) context.go('/home');
     });
   }

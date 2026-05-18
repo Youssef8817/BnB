@@ -49,6 +49,22 @@ class WorkerServiceController extends Controller
         ]);
     }
 
+    public function myServices(Request $request)
+    {
+        $services = WorkerService::where('worker_id', $request->user()->id)
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => WorkerServiceResource::collection($services),
+            'message' => 'OK',
+            'errors' => null,
+        ]);
+    }
+
     public function store(StoreWorkerServiceRequest $request)
     {
         $validated = $request->validated();

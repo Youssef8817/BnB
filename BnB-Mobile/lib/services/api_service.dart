@@ -184,6 +184,16 @@ class ApiService {
     return servicesJson.map((json) => WorkerService.fromJson(json)).toList();
   }
 
+  static Future<List<WorkerService>> getMyWorkerServices() async {
+    final response = await http.get(
+      Uri.parse('${Constants.baseUrl}/my-worker-services'),
+      headers: await _headers(),
+    );
+    final dynamic raw = await _handleResponse(response);
+    final List<dynamic> servicesJson = raw is List ? raw : (raw as Map<String, dynamic>)['data'] as List<dynamic>;
+    return servicesJson.map((json) => WorkerService.fromJson(json)).toList();
+  }
+
   static Future<void> createWorkerService(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('${Constants.baseUrl}/worker-services'),

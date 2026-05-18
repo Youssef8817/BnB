@@ -161,7 +161,7 @@ class _MyServicesTabState extends State<_MyServicesTab> {
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final services = await ApiService.getWorkerServices();
+      final services = await ApiService.getMyWorkerServices();
       setState(() {
         _services  = services;
         _isLoading = false;

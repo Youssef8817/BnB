@@ -32,6 +32,7 @@ Route::middleware('throttle:api')->group(function () {
         Route::post('/worker-services/{workerService}/reviews', [ReviewController::class, 'store']);
 
         Route::middleware('worker')->group(function () {
+            Route::get('/my-worker-services', [WorkerServiceController::class, 'myServices']);
             Route::post('/worker-services', [WorkerServiceController::class, 'store']);
             Route::put('/worker-services/{workerService}', [WorkerServiceController::class, 'update']);
             Route::delete('/worker-services/{workerService}', [WorkerServiceController::class, 'destroy']);
