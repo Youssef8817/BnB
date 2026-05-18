@@ -21,6 +21,8 @@ class ApiService {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
       'Content-Type': 'application/json',
+      'CF-Access-Client-Id': 'flutter-app',
+      'User-Agent': 'BnBApp/1.0',
     };
   }
 

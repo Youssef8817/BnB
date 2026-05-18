@@ -1,7 +1,6 @@
 import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/screens/property_detail_screen.dart';
 import 'package:b_and_b/theme/app_theme.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class PropertyCard extends StatelessWidget {
@@ -41,12 +40,13 @@ class PropertyCard extends StatelessWidget {
                   SizedBox(
                     height: 180,
                     child: property.images.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: property.images.first.fullUrl,
+                        ? Image.network(
+                            property.images.first.fullUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            placeholder: (_, __) => _placeholder(),
-                            errorWidget: (_, __, ___) => _placeholder(),
+                            errorBuilder: (_, __, ___) => _placeholder(),
+                            loadingBuilder: (_, child, progress) =>
+                                progress == null ? child : _placeholder(),
                           )
                         : _placeholder(),
                   ),

@@ -2,7 +2,6 @@ import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/repositories/property_repository.dart';
 import 'package:b_and_b/services/api_service.dart';
 import 'package:b_and_b/theme/app_theme.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -266,12 +265,13 @@ class _PropertyCard extends StatelessWidget {
             child: SizedBox(
               height: 160,
               child: hasImage
-                  ? CachedNetworkImage(
-                      imageUrl: property.images.first.fullUrl,
+                  ? Image.network(
+                      property.images.first.fullUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (_, __) => _imgPlaceholder(),
-                      errorWidget: (_, __, ___) => _imgPlaceholder(),
+                      errorBuilder: (_, __, ___) => _imgPlaceholder(),
+                      loadingBuilder: (_, child, progress) =>
+                          progress == null ? child : _imgPlaceholder(),
                     )
                   : _imgPlaceholder(),
             ),

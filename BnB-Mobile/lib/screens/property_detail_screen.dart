@@ -5,7 +5,6 @@ import 'package:b_and_b/models/property.dart';
 import 'package:b_and_b/models/user.dart';
 import 'package:b_and_b/services/api_service.dart';
 import 'package:b_and_b/theme/app_theme.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -109,9 +108,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
               child: InteractiveViewer(
                 child: Hero(
                   tag: 'property_image_${widget.property.id}_$index',
-                  child: CachedNetworkImage(
-                    imageUrl: widget.property.images[index].fullUrl,
+                  child: Image.network(
+                    widget.property.images[index].fullUrl,
                     fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
                   ),
                 ),
               ),
@@ -179,12 +179,12 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                                   onTap: () => _openFullscreen(i),
                                   child: Hero(
                                     tag: tag,
-                                    child: CachedNetworkImage(
-                                      imageUrl: images[i].fullUrl,
+                                    child: Image.network(
+                                      images[i].fullUrl,
                                       fit: BoxFit.cover,
-                                      placeholder: (_, __) => _imgPlaceholder(),
-                                      errorWidget: (_, __, ___) =>
-                                          _imgPlaceholder(),
+                                      errorBuilder: (_, __, ___) => _imgPlaceholder(),
+                                      loadingBuilder: (_, child, progress) =>
+                                          progress == null ? child : _imgPlaceholder(),
                                     ),
                                   ),
                                 );
